@@ -1,0 +1,13 @@
+{
+  "name": "pinnotes",
+  "version": "1.0.0",
+  "description": "A simple note-taking app with Express.js backend and vanilla JavaScript frontend.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1"
+  }
+}
