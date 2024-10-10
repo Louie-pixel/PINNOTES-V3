@@ -3,64 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login to Pinnotes</title>
+  <title>Login - Pinnotes</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(45deg, #3498db, #8e44ad);
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: white;
-    }
-    .login-box {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 40px;
-      border-radius: 15px;
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(5px);
-    }
-    .login-box h1 {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
       text-align: center;
-      margin-bottom: 30px;
-      color: white;
     }
-    .form-control {
-      background-color: rgba(255, 255, 255, 0.8);
-      color: black;
+    .container {
+      margin-top: 50px;
     }
     .btn-custom {
-      background-color: #e74c3c;
+      background-color: #3498db;
       color: white;
-      width: 100%;
-      margin-top: 20px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      transition: background-color 0.3s;
     }
-    .signup-link {
-      text-align: center;
-      margin-top: 10px;
+    .btn-custom:hover {
+      background-color: #2980b9;
     }
   </style>
 </head>
 <body>
-  <div class="login-box">
-    <h1>Login to Pinnotes</h1>
-    <div class="form-group">
-      <label for="username">Username</label>
-      <input type="text" class="form-control" id="username" placeholder="Enter username">
-    </div>
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input type="password" class="form-control" id="password" placeholder="Enter password">
-    </div>
-    <button id="login" class="btn btn-custom">Login</button>
-    <p class="signup-link">Don't have an account? <a href="/signup" style="color: #fff;">Sign up</a></p>
+  <div class="container">
+    <h2>Login to Pinnotes</h2>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Username" required>
+      <br><br>
+      <input type="password" id="password" placeholder="Password" required>
+      <br><br>
+      <button type="submit" class="btn-custom">Login</button>
+    </form>
+    <p>Don't have an account? <a href="/signup">Sign up here!</a></p>
   </div>
 
   <script>
-    document.getElementById('login').addEventListener('click', () => {
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
 
@@ -72,12 +55,14 @@
       .then(response => response.json())
       .then(data => {
         if (data.success) {
+          // Store sessionId in localStorage
           localStorage.setItem('sessionId', data.sessionId);
-          window.location.href = "/";
+          window.location.href = '/dashboard';  // Redirect to dashboard
         } else {
           alert(data.message);
         }
-      });
+      })
+      .catch(error => console.error('Error:', error));
     });
   </script>
 </body>
