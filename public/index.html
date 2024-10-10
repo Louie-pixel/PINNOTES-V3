@@ -122,6 +122,34 @@
     </div>
   </div>
 
+  <!-- Edit Note Modal -->
+  <div class="modal fade" id="editNoteModal" tabindex="-1" role="dialog" aria-labelledby="editNoteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editNoteModalLabel">Edit Note</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="editTitle">Title</label>
+            <input type="text" class="form-control" id="editTitle" required>
+          </div>
+          <div class="form-group">
+            <label for="editDesc">Description</label>
+            <textarea id="editDesc" class="form-control" required rows="5"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="editSubmit">Update Note</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     async function postData(url = '', data = {}) {
       const response = await fetch(url, {
@@ -138,48 +166,81 @@
       const user = JSON.parse(localStorage.getItem('user'));
       if (user && user.email) {
         let noteContainer = document.querySelector(".mynotes");
-        noteContainer.innerHTML = "";
-        postData('/getnotes', { email: user.email }).then((notes) => {
-          notes.notes.forEach(element => {
-            let note =
-              `<div class="col-md-4">
-                <div class="card m-2">
-                  <div class="card-body">
-                    <h5 class="card-title">${element.title}</h5>
-                    <p class="card-text">${element.desc}</p>
-                    <button class="btn btn-danger" onclick="deleteNote(${element.id})">Delete</button>
-                  </div>
+        noteContainer.innerHTML = ''; // Clear existing notes
+        postData('/getnotes', { email: user.email }).then(resp => {
+          if (resp.success) {
+            resp.notes.forEach(note => {
+              const noteCard = document.createElement('div');
+              noteCard.classList.add('col-md-4', 'card');
+              noteCard.innerHTML = `
+                <div class="card-body">
+                  <h5 class="card-title">${note.title}</h5>
+                  <p class="card-text">${note.desc}</p>
+                  <button class="btn btn-warning edit-note" data-id="${note.id}" data-title="${note.title}" data-desc="${note.desc}">Edit</button>
+                  <button class="btn btn-danger delete-note" data-id="${note.id}">Delete</button>
                 </div>
-              </div>`;
-            noteContainer.innerHTML += note;
-          });
+              `;
+              noteContainer.appendChild(noteCard);
+            });
+
+            // Attach event listeners to edit and delete buttons
+            document.querySelectorAll('.edit-note').forEach(button => {
+              button.addEventListener('click', (e) => {
+                const id = e.target.getAttribute('data-id');
+                const title = e.target.getAttribute('data-title');
+                const desc = e.target.getAttribute('data-desc');
+                
+                // Populate edit modal
+                document.getElementById('editTitle').value = title;
+                document.getElementById('editDesc').value = desc;
+                document.getElementById('editSubmit').setAttribute('data-id', id);
+
+                $('#editNoteModal').modal('show');
+              });
+            });
+
+            document.querySelectorAll('.delete-note').forEach(button => {
+              button.addEventListener('click', (e) => {
+                const id = e.target.getAttribute('data-id');
+                const userEmail = JSON.parse(localStorage.getItem('user')).email;
+
+                postData('/deletenote', { id, email: userEmail }).then(resp => {
+                  alert(resp.message);
+                  fetchNotes(); // Refresh notes
+                });
+              });
+            });
+          }
         });
-      } else {
-        alert('Please login first');
       }
-    }
+    };
 
-    const deleteNote = (id) => {
-      const user = JSON.parse(localStorage.getItem('user'));
-      postData('/deletenote', { id, email: user.email }).then(resp => {
-        if (resp.success) {
-          alert("Note Deleted.");
-          fetchNotes();
-        }
-      });
-    }
-
-    // Add a click listener for submit
+    // Add note function
     document.getElementById('submit').addEventListener('click', async () => {
-      let title = document.getElementById('title').value;
-      let desc = document.getElementById('desc').value;
-      let email = JSON.parse(localStorage.getItem("user"))?.email;
-      let resp = await postData("/addnote", { title, desc, email });
-      if (resp.success) {
-        alert("Note Created.");
-        document.getElementById('title').value = "";
-        document.getElementById('desc').value = "";
-        fetchNotes();
+      const title = document.getElementById('title').value;
+      const desc = document.getElementById('desc').value;
+      const font = document.getElementById('fontSelector').value;
+
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (user && user.email) {
+        const resp = await postData('/addnote', { email: user.email, title, desc });
+        alert(resp.message);
+        fetchNotes(); // Refresh notes
+      }
+    });
+
+    // Edit note function
+    document.getElementById('editSubmit').addEventListener('click', async () => {
+      const id = document.getElementById('editSubmit').getAttribute('data-id');
+      const title = document.getElementById('editTitle').value;
+      const desc = document.getElementById('editDesc').value;
+
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (user && user.email) {
+        const resp = await postData('/editnote', { id, email: user.email, title, desc });
+        alert(resp.message);
+        $('#editNoteModal').modal('hide');
+        fetchNotes(); // Refresh notes
       }
     });
 
