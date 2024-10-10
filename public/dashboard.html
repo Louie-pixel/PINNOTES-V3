@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Pinnotes</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      text-align: center;
+    }
+    .container {
+      margin-top: 50px;
+    }
+    .btn-custom {
+      background-color: #3498db;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      margin: 10px;
+      transition: background-color 0.3s;
+    }
+    .btn-custom:hover {
+      background-color: #2980b9;
+    }
+    .note {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 15px;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Your Notes</h2>
+    <button id="newNoteBtn" class="btn-custom">Create New Note</button>
+    <div id="notesContainer"></div>
+  </div>
+
+  <script>
+    document.getElementById('newNoteBtn').addEventListener('click', function() {
+      window.location.href = '/newnote';  // Redirect to new note page
+    });
+
+    const sessionId = localStorage.getItem('sessionId');
+
+    fetch('/getnotes', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ sessionId })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        const notesContainer = document.getElementById('notesContainer');
+        data.notes.forEach(note => {
+          const noteDiv = document.createElement('div');
+          noteDiv.className = 'note';
+          noteDiv.innerHTML = `<h4>${note.title}</h4><p>${note.desc}</p><button class="btn-custom delete-btn" data-id="${note.id}">Delete</button>`;
+          notesContainer.appendChild(noteDiv);
+        });
+        // Add delete functionality
+        document.querySelectorAll('.delete-btn').forEach(button => {
+          button.addEventListener('click', function() {
+            const noteId = this.getAttribute('data-id');
+            fetch('/deletenote', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ id: noteId, sessionId })
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                alert(data.message);
+                location.reload();  // Refresh the page to get updated notes
+              } else {
+                alert(data.message);
+              }
+            });
+          });
+        });
+      } else {
+        alert(data.message);
+      }
+    })
+    .catch(error => console.error('Error:', error));
+  </script>
+</body>
+</html>
