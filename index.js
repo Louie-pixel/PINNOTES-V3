@@ -17,37 +17,23 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
-
-app.get('/signup', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'signup.html'));
-});
-
-// API: Register a user (username, email, and password)
+// API: Register a user
 app.post('/register', (req, res) => {
   const { username, email, password } = req.body;
-
-  if (users.find(user => user.email === email || user.username === username)) {
+  if (users.find(user => user.email === email)) {
     return res.json({ success: false, message: 'User already exists' });
   }
-
   users.push({ username, email, password });
   return res.json({ success: true, message: 'User registered' });
 });
 
-// API: Login a user (using either username or email)
+// API: Login a user
 app.post('/login', (req, res) => {
-  const { usernameOrEmail, password } = req.body;
-  const user = users.find(
-    user => (user.username === usernameOrEmail || user.email === usernameOrEmail) && user.password === password
-  );
-
+  const { username, password } = req.body;
+  const user = users.find(user => user.username === username && user.password === password);
   if (!user) {
     return res.json({ success: false, message: 'Invalid credentials' });
   }
-
   return res.json({ success: true, message: 'Login successful', email: user.email });
 });
 
@@ -77,5 +63,5 @@ app.post('/deletenote', (req, res) => {
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on http://192.168.0.106:${PORT}`);
 });
