@@ -110,5 +110,5 @@ app.post('/deletenote', (req, res) => {
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on http://192.168.0.106:${PORT}`);
 });
