@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Note - Pinnotes</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      text-align: center;
+    }
+    .container {
+      margin-top: 50px;
+    }
+    .btn-custom {
+      background-color: #3498db;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+    .btn-custom:hover {
+      background-color: #2980b9;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Create New Note</h2>
+    <form id="newNoteForm">
+      <input type="text" id="title" placeholder="Title" required>
+      <br><br>
+      <textarea id="desc" placeholder="Description" required></textarea>
+      <br><br>
+      <button type="submit" class="btn-custom">Add Note</button>
+    </form>
+    <button class="btn-custom" onclick="window.location.href='/dashboard'">Back to Dashboard</button>
+  </div>
+
+  <script>
+    document.getElementById('newNoteForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const title = document.getElementById('title').value;
+      const desc = document.getElementById('desc').value;
+      const sessionId = localStorage.getItem('sessionId');
+
+      fetch('/addnote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, desc, sessionId })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert(data.message);
+        if (data.success) {
+          window.location.href = '/dashboard';  // Redirect to dashboard after adding note
+        }
+      })
+      .catch(error => console.error('Error:', error));
+    });
+  </script>
+</body>
+</html>
