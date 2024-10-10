@@ -12,24 +12,32 @@
       color: #333;
     }
     .container {
-      margin-top: 20px;
+      margin: 20px auto;
+      max-width: 800px;
     }
-    .note-card {
-      background-color: #fff;
+    h2 {
+      margin-bottom: 20px;
+    }
+    .note {
+      background-color: white;
       border: 1px solid #ddd;
       border-radius: 5px;
-      padding: 15px;
+      padding: 10px;
       margin-bottom: 10px;
-    }
-    .search-bar {
-      margin-bottom: 20px;
     }
     .btn-custom {
       background-color: #3498db;
       color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
     }
     .btn-custom:hover {
       background-color: #2980b9;
+    }
+    .search-bar {
+      margin-bottom: 20px;
     }
   </style>
 </head>
@@ -39,15 +47,20 @@
     <div class="search-bar">
       <input type="text" id="search" placeholder="Search notes..." class="form-control">
     </div>
-    <button id="newNoteBtn" class="btn btn-custom">New Note</button>
+    <button id="newNoteButton" class="btn-custom">Create New Note</button>
     <div id="noteList"></div>
   </div>
 
   <script>
     let sessionId = localStorage.getItem('sessionId');
 
-    // Fetch notes
-    const fetchNotes = () => {
+    // Fetch notes on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchNotes();
+    });
+
+    // Function to fetch notes
+    function fetchNotes() {
       fetch('/getnotes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -56,33 +69,32 @@
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          displayNotes(data.notes);
+          renderNotes(data.notes);
         } else {
           alert(data.message);
         }
       })
       .catch(error => console.error('Error:', error));
-    };
+    }
 
-    // Display notes
-    const displayNotes = (notes) => {
+    // Function to render notes
+    function renderNotes(notes) {
       const noteList = document.getElementById('noteList');
-      noteList.innerHTML = '';
+      noteList.innerHTML = ''; // Clear previous notes
       notes.forEach(note => {
-        const noteCard = document.createElement('div');
-        noteCard.classList.add('note-card');
-        noteCard.innerHTML = `
+        const noteElement = document.createElement('div');
+        noteElement.className = 'note';
+        noteElement.innerHTML = `
           <h4>${note.title}</h4>
           <p>${note.desc}</p>
-          <button onclick="editNote(${note.id})" class="btn btn-warning">Edit</button>
-          <button onclick="deleteNote(${note.id})" class="btn btn-danger">Delete</button>
+          <button class="btn-custom" onclick="deleteNote(${note.id})">Delete</button>
         `;
-        noteList.appendChild(noteCard);
+        noteList.appendChild(noteElement);
       });
-    };
+    }
 
-    // Delete a note
-    const deleteNote = (id) => {
+    // Function to delete a note
+    function deleteNote(id) {
       fetch('/deletenote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -91,36 +103,33 @@
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          fetchNotes();
           alert(data.message);
+          fetchNotes(); // Refresh notes
         } else {
           alert(data.message);
         }
       })
       .catch(error => console.error('Error:', error));
-    };
+    }
 
-    // Redirect to new note page
-    document.getElementById('newNoteBtn').addEventListener('click', () => {
-      window.location.href = '/newnote';
+    // Create New Note Button
+    document.getElementById('newNoteButton').addEventListener('click', () => {
+      window.location.href = '/newnote'; // Redirect to new note page
     });
 
     // Search functionality
-    document.getElementById('search').addEventListener('keyup', function() {
-      const filter = this.value.toLowerCase();
-      const noteCards = document.querySelectorAll('.note-card');
-      noteCards.forEach(card => {
-        const title = card.querySelector('h4').innerText.toLowerCase();
-        if (title.includes(filter)) {
-          card.style.display = '';
+    document.getElementById('search').addEventListener('input', function() {
+      const query = this.value.toLowerCase();
+      const notes = document.querySelectorAll('.note');
+      notes.forEach(note => {
+        const title = note.querySelector('h4').textContent.toLowerCase();
+        if (title.includes(query)) {
+          note.style.display = 'block';
         } else {
-          card.style.display = 'none';
+          note.style.display = 'none';
         }
       });
     });
-
-    // Initial fetch of notes
-    fetchNotes();
   </script>
 </body>
 </html>
