@@ -2,281 +2,97 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Pinnotes - A Note-Taking Web App</title>
-  <base href="/">
+  <title>Pinnotes Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-  <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="https://fonts.cdnfonts.com/css/callie-chalk-font" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <nav class="navbar navbar-default">
-    <div class="container-fluid">
-      <div class="navbar-header">
-        <a class="navbar-brand" href="#">Pinnotes</a>
+  <div class="container">
+    <h1 class="my-4">Welcome to Pinnotes Dashboard</h1>
+    <button id="logout" class="btn btn-danger">Logout</button>
+
+    <h2 class="my-4">Add a New Note</h2>
+    <div>
+      <div class="mb-3">
+        <label for="title" class="form-label">Title</label>
+        <input type="text" class="form-control" id="title" aria-describedby="titleHelp">
+        <div id="titleHelp" class="form-text">Add a title for your note.</div>
       </div>
-      <ul class="nav navbar-nav">
-        <li class="active"><a href="#" id="showNotes">Your Notes</a></li>
-        <li><a href="#" id="addNote">Add Note</a></li>
-      </ul>
-      <div class="navbar-right">
-        <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#loginModal">Login</button>
-        <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#signupModal">Signup</button>
+      <div class="mb-3">
+        <label for="desc" class="form-label">Description</label>
+        <textarea type="text" class="form-control" id="desc"></textarea>
       </div>
+      <button id="submit" class="btn btn-primary">Submit</button>
     </div>
-  </nav>
-  
-  <div class="container dashboard">
-    <h1 class="text-center">Welcome to Pinnotes</h1>
-    <div class="note-area">
-      <h2>Add a Note</h2>
-      <div class="form-group">
-        <label for="title">Title</label>
-        <input type="text" class="form-control" id="title" placeholder="Enter note title">
-      </div>
-      <div class="form-group">
-        <label for="desc">Description</label>
-        <textarea id="desc" class="form-control" placeholder="Write your note here..." rows="5"></textarea>
-      </div>
-      <div class="form-group">
-        <label for="fontSelector">Select Font:</label>
-        <select id="fontSelector" class="form-control">
-          <option value="Arial">Arial</option>
-          <option value="Courier New">Courier New</option>
-          <option value="Georgia">Georgia</option>
-          <option value="Times New Roman">Times New Roman</option>
-          <option value="Verdana">Verdana</option>
-        </select>
-      </div>
-      <button id="submit" class="btn btn-success">Submit</button>
-    </div>
-    
-    <h2 class="mt-4">Your Notes</h2>
+
+    <h2 class="my-4">Your Notes</h2>
     <div class="mynotes row"></div>
   </div>
 
-  <!-- Login Modal -->
-  <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="loginModalLabel">Login</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="loginUsername">Username</label>
-            <input type="text" class="form-control" id="loginUsername" required>
-          </div>
-          <div class="form-group">
-            <label for="loginPassword">Password</label>
-            <input type="password" class="form-control" id="loginPassword" required>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" id="loginSubmit">Login</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Signup Modal -->
-  <div class="modal fade" id="signupModal" tabindex="-1" role="dialog" aria-labelledby="signupModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="signupModalLabel">Signup</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="signupUsername">Username</label>
-            <input type="text" class="form-control" id="signupUsername" required>
-          </div>
-          <div class="form-group">
-            <label for="signupEmail">Email</label>
-            <input type="email" class="form-control" id="signupEmail" required>
-          </div>
-          <div class="form-group">
-            <label for="signupPassword">Password</label>
-            <input type="password" class="form-control" id="signupPassword" required>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" id="signupSubmit">Signup</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Edit Note Modal -->
-  <div class="modal fade" id="editNoteModal" tabindex="-1" role="dialog" aria-labelledby="editNoteModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="editNoteModalLabel">Edit Note</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="editTitle">Title</label>
-            <input type="text" class="form-control" id="editTitle" required>
-          </div>
-          <div class="form-group">
-            <label for="editDesc">Description</label>
-            <textarea id="editDesc" class="form-control" required rows="5"></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" id="editSubmit">Update Note</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <script>
-    async function postData(url = '', data = {}) {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
-      return response.json();
+    // Redirect to login if no session ID is found
+    const sessionId = localStorage.getItem('sessionId');
+    if (!sessionId) {
+      window.location.href = "/login";
     }
 
+    // Logout functionality
+    document.getElementById('logout').addEventListener('click', () => {
+      localStorage.removeItem('sessionId');
+      window.location.href = "/login";
+    });
+
+    // Fetch and display notes for the logged-in user
     const fetchNotes = () => {
-      const user = JSON.parse(localStorage.getItem('user'));
-      if (user && user.email) {
-        let noteContainer = document.querySelector(".mynotes");
-        noteContainer.innerHTML = ''; // Clear existing notes
-        postData('/getnotes', { email: user.email }).then(resp => {
-          if (resp.success) {
-            resp.notes.forEach(note => {
-              const noteCard = document.createElement('div');
-              noteCard.classList.add('col-md-4', 'card');
-              noteCard.innerHTML = `
+      const noteContainer = document.querySelector(".mynotes");
+      noteContainer.innerHTML = "";
+      fetch('/getnotes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          data.notes.forEach(note => {
+            const noteHTML = `
+              <div class="card" style="width: 18rem;">
                 <div class="card-body">
                   <h5 class="card-title">${note.title}</h5>
                   <p class="card-text">${note.desc}</p>
-                  <button class="btn btn-warning edit-note" data-id="${note.id}" data-title="${note.title}" data-desc="${note.desc}">Edit</button>
-                  <button class="btn btn-danger delete-note" data-id="${note.id}">Delete</button>
                 </div>
-              `;
-              noteContainer.appendChild(noteCard);
-            });
-
-            // Attach event listeners to edit and delete buttons
-            document.querySelectorAll('.edit-note').forEach(button => {
-              button.addEventListener('click', (e) => {
-                const id = e.target.getAttribute('data-id');
-                const title = e.target.getAttribute('data-title');
-                const desc = e.target.getAttribute('data-desc');
-                
-                // Populate edit modal
-                document.getElementById('editTitle').value = title;
-                document.getElementById('editDesc').value = desc;
-                document.getElementById('editSubmit').setAttribute('data-id', id);
-
-                $('#editNoteModal').modal('show');
-              });
-            });
-
-            document.querySelectorAll('.delete-note').forEach(button => {
-              button.addEventListener('click', (e) => {
-                const id = e.target.getAttribute('data-id');
-                const userEmail = JSON.parse(localStorage.getItem('user')).email;
-
-                postData('/deletenote', { id, email: userEmail }).then(resp => {
-                  alert(resp.message);
-                  fetchNotes(); // Refresh notes
-                });
-              });
-            });
-          }
-        });
-      }
+              </div>`;
+            noteContainer.innerHTML += noteHTML;
+          });
+        } else {
+          alert('Error fetching notes.');
+        }
+      });
     };
 
-    // Add note function
-    document.getElementById('submit').addEventListener('click', async () => {
+    // Submit new note
+    document.getElementById('submit').addEventListener('click', () => {
       const title = document.getElementById('title').value;
       const desc = document.getElementById('desc').value;
-      const font = document.getElementById('fontSelector').value;
-
-      const user = JSON.parse(localStorage.getItem('user'));
-      if (user && user.email) {
-        const resp = await postData('/addnote', { email: user.email, title, desc });
-        alert(resp.message);
-        fetchNotes(); // Refresh notes
-      }
+      fetch('/addnote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, title, desc })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Note added!');
+          fetchNotes();
+        } else {
+          alert(data.message);
+        }
+      });
     });
 
-    // Edit note function
-    document.getElementById('editSubmit').addEventListener('click', async () => {
-      const id = document.getElementById('editSubmit').getAttribute('data-id');
-      const title = document.getElementById('editTitle').value;
-      const desc = document.getElementById('editDesc').value;
-
-      const user = JSON.parse(localStorage.getItem('user'));
-      if (user && user.email) {
-        const resp = await postData('/editnote', { id, email: user.email, title, desc });
-        alert(resp.message);
-        $('#editNoteModal').modal('hide');
-        fetchNotes(); // Refresh notes
-      }
-    });
-
-    // Signup function
-    document.getElementById('signupSubmit').addEventListener('click', async () => {
-      const username = document.getElementById('signupUsername').value;
-      const email = document.getElementById('signupEmail').value;
-      const password = document.getElementById('signupPassword').value;
-
-      const resp = await postData('/register', { username, email, password });
-      alert(resp.message);
-      if (resp.success) {
-        $('#signupModal').modal('hide');
-      }
-    });
-
-    // Login function
-    document.getElementById('loginSubmit').addEventListener('click', async () => {
-      const username = document.getElementById('loginUsername').value;
-      const password = document.getElementById('loginPassword').value;
-
-      const resp = await postData('/login', { username, password });
-      alert(resp.message);
-      if (resp.success) {
-        localStorage.setItem('user', JSON.stringify({ email: resp.email }));
-        $('#loginModal').modal('hide');
-        fetchNotes();
-      }
-    });
-
-    // Logout function
-    document.getElementById('logout').addEventListener('click', () => {
-      localStorage.removeItem('user');
-      window.location.reload();
-    });
-
+    // Load notes on page load
     fetchNotes();
   </script>
 </body>
