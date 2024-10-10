@@ -32,6 +32,14 @@ app.get('/signup', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'signup.html'));
 });
 
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+app.get('/newnote', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'newnote.html'));
+});
+
 // API: Register a user
 app.post('/register', (req, res) => {
   const { email, username, password } = req.body;
@@ -63,7 +71,7 @@ app.post('/addnote', (req, res) => {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
 
-  const { email, title, desc, sessionId } = req.body;
+  const { title, desc, sessionId } = req.body;
   const user = sessions[sessionId];
 
   if (!title || !desc) {
