@@ -1,53 +1,71 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pinnotes Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(45deg, #2ecc71, #27ae60);
+      height: 100vh;
+      color: white;
+    }
+    .dashboard {
+      padding: 20px;
+    }
+    .dashboard h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: white;
+    }
+    .form-control {
+      background-color: rgba(255, 255, 255, 0.8);
+      color: black;
+    }
+    .btn-custom {
+      background-color: #e74c3c;
+      color: white;
+      margin-top: 10px;
+    }
+    .notes {
+      margin-top: 30px;
+    }
+    .note-card {
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1 class="my-4">Welcome to Pinnotes Dashboard</h1>
-    <button id="logout" class="btn btn-danger">Logout</button>
-
-    <h2 class="my-4">Add a New Note</h2>
-    <div>
-      <div class="mb-3">
-        <label for="title" class="form-label">Title</label>
-        <input type="text" class="form-control" id="title" aria-describedby="titleHelp">
-        <div id="titleHelp" class="form-text">Add a title for your note.</div>
-      </div>
-      <div class="mb-3">
-        <label for="desc" class="form-label">Description</label>
-        <textarea type="text" class="form-control" id="desc"></textarea>
-      </div>
-      <button id="submit" class="btn btn-primary">Submit</button>
+  <div class="dashboard">
+    <h1>Pinnotes Dashboard</h1>
+    <div class="form-group">
+      <label for="title">Title</label>
+      <input type="text" class="form-control" id="title" placeholder="Note title">
     </div>
+    <div class="form-group">
+      <label for="desc">Description</label>
+      <textarea class="form-control" id="desc" rows="3" placeholder="Note description"></textarea>
+    </div>
+    <button id="submit" class="btn btn-custom">Add Note</button>
 
-    <h2 class="my-4">Your Notes</h2>
-    <div class="mynotes row"></div>
+    <div class="notes" id="notes-container"></div>
   </div>
 
   <script>
-    // Redirect to login if no session ID is found
+    // Check if logged in
     const sessionId = localStorage.getItem('sessionId');
     if (!sessionId) {
       window.location.href = "/login";
     }
 
-    // Logout functionality
-    document.getElementById('logout').addEventListener('click', () => {
-      localStorage.removeItem('sessionId');
-      window.location.href = "/login";
-    });
-
-    // Fetch and display notes for the logged-in user
+    // Fetch notes and render them
     const fetchNotes = () => {
-      const noteContainer = document.querySelector(".mynotes");
-      noteContainer.innerHTML = "";
       fetch('/getnotes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -55,14 +73,14 @@
       })
       .then(response => response.json())
       .then(data => {
+        const noteContainer = document.getElementById('notes-container');
+        noteContainer.innerHTML = '';
         if (data.success) {
           data.notes.forEach(note => {
             const noteHTML = `
-              <div class="card" style="width: 18rem;">
-                <div class="card-body">
-                  <h5 class="card-title">${note.title}</h5>
-                  <p class="card-text">${note.desc}</p>
-                </div>
+              <div class="note-card">
+                <h4>${note.title}</h4>
+                <p>${note.desc}</p>
               </div>`;
             noteContainer.innerHTML += noteHTML;
           });
@@ -72,7 +90,7 @@
       });
     };
 
-    // Submit new note
+    // Add note
     document.getElementById('submit').addEventListener('click', () => {
       const title = document.getElementById('title').value;
       const desc = document.getElementById('desc').value;
