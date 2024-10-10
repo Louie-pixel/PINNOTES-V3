@@ -10,7 +10,6 @@
       font-family: Arial, sans-serif;
       background-color: #f5f5f5;
       color: #333;
-      text-align: center;
     }
     .container {
       margin-top: 50px;
@@ -18,10 +17,6 @@
     .btn-custom {
       background-color: #3498db;
       color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      transition: background-color 0.3s;
     }
     .btn-custom:hover {
       background-color: #2980b9;
@@ -30,34 +25,36 @@
 </head>
 <body>
   <div class="container">
-    <h2>Create New Note</h2>
-    <form id="newNoteForm">
-      <input type="text" id="title" placeholder="Title" required>
-      <br><br>
-      <textarea id="desc" placeholder="Description" required></textarea>
-      <br><br>
-      <button type="submit" class="btn-custom">Add Note</button>
+    <h2>Create a New Note</h2>
+    <form id="noteForm">
+      <input type="text" id="title" placeholder="Title" required class="form-control">
+      <br>
+      <textarea id="desc" placeholder="Description" required class="form-control"></textarea>
+      <br>
+      <button type="submit" class="btn btn-custom">Save Note</button>
     </form>
-    <button class="btn-custom" onclick="window.location.href='/dashboard'">Back to Dashboard</button>
+    <button onclick="window.location.href='/dashboard'" class="btn btn-default">Back to Dashboard</button>
   </div>
 
   <script>
-    document.getElementById('newNoteForm').addEventListener('submit', function(e) {
+    let sessionId = localStorage.getItem('sessionId');
+
+    // Handle note form submission
+    document.getElementById('noteForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const title = document.getElementById('title').value;
       const desc = document.getElementById('desc').value;
-      const sessionId = localStorage.getItem('sessionId');
 
       fetch('/addnote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, desc, sessionId })
+        body: JSON.stringify({ sessionId, title, desc })
       })
       .then(response => response.json())
       .then(data => {
         alert(data.message);
         if (data.success) {
-          window.location.href = '/dashboard';  // Redirect to dashboard after adding note
+          window.location.href = '/dashboard';  // Redirect to dashboard after saving
         }
       })
       .catch(error => console.error('Error:', error));
