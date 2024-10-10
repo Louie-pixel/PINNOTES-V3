@@ -1,30 +1,12 @@
 /* public/style.css */
 
 body {
+    font-family: 'Roboto', sans-serif;
     background-color: #f8f9fa;
 }
 
 .dashboard {
     margin-top: 20px;
-}
-
-.sidebar {
-    background-color: #343a40;
-    color: white;
-    padding: 20px;
-}
-
-.sidebar h3 {
-    color: #ffffff;
-}
-
-.sidebar a {
-    color: white;
-    text-decoration: none;
-}
-
-.sidebar a:hover {
-    text-decoration: underline;
 }
 
 .note-area {
