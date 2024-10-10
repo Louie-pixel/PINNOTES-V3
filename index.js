@@ -13,12 +13,6 @@ let sessions = {};  // Store active sessions by username
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Helper function to check if a user is authenticated
-const isAuthenticated = (req) => {
-  const { sessionId } = req.body;
-  return sessions[sessionId];
-};
-
 // Serve frontend
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -67,11 +61,12 @@ app.post('/login', (req, res) => {
 
 // API: Add a note (Authenticated route)
 app.post('/addnote', (req, res) => {
-  if (!isAuthenticated(req)) {
+  const { sessionId, title, desc } = req.body;
+
+  if (!sessions[sessionId]) {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
 
-  const { title, desc, sessionId } = req.body;
   const user = sessions[sessionId];
 
   if (!title || !desc) {
@@ -84,11 +79,12 @@ app.post('/addnote', (req, res) => {
 
 // API: Get notes for a user (Authenticated route)
 app.post('/getnotes', (req, res) => {
-  if (!isAuthenticated(req)) {
+  const { sessionId } = req.body;
+
+  if (!sessions[sessionId]) {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
 
-  const { sessionId } = req.body;
   const user = sessions[sessionId];
   const userNotes = notes.filter(note => note.email === user.email);
 
@@ -97,18 +93,18 @@ app.post('/getnotes', (req, res) => {
 
 // API: Delete a note (Authenticated route)
 app.post('/deletenote', (req, res) => {
-  if (!isAuthenticated(req)) {
+  const { id, sessionId } = req.body;
+
+  if (!sessions[sessionId]) {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
 
-  const { id, sessionId } = req.body;
   const user = sessions[sessionId];
-
   notes = notes.filter(note => note.id !== parseInt(id) || note.email !== user.email);
   return res.json({ success: true, message: 'Note deleted' });
 });
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`Server running on http://192.168.0.106:${PORT}`);
+   console.log(`Server running on http://192.168.0.106:${PORT}`);
 });
