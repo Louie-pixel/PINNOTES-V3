@@ -54,6 +54,21 @@ app.post('/getnotes', (req, res) => {
   return res.json({ success: true, notes: userNotes });
 });
 
+// API: Edit a note
+app.post('/editnote', (req, res) => {
+  const { id, email, title, desc } = req.body;
+  const noteIndex = notes.findIndex(note => note.id === parseInt(id) && note.email === email);
+  
+  if (noteIndex === -1) {
+    return res.json({ success: false, message: 'Note not found' });
+  }
+
+  notes[noteIndex].title = title;
+  notes[noteIndex].desc = desc;
+  
+  return res.json({ success: true, message: 'Note updated' });
+});
+
 // API: Delete a note
 app.post('/deletenote', (req, res) => {
   const { id, email } = req.body;
@@ -63,5 +78,5 @@ app.post('/deletenote', (req, res) => {
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`Server running on http://192.168.0.106:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
