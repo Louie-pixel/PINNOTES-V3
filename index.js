@@ -37,23 +37,30 @@ app.get('/newnote', (req, res) => {
 // API: Register a user
 app.post('/register', (req, res) => {
   const { email, username, password } = req.body;
+
+  // Check if the user already exists
   if (users.find(user => user.email === email || user.username === username)) {
     return res.json({ success: false, message: 'User already exists' });
   }
+
+  // Create a new user
   users.push({ email, username, password });
-  return res.json({ success: true, message: 'User registered' });
+  return res.json({ success: true, message: 'User registered successfully' });
 });
 
 // API: Login a user
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
+
+  // Find the user with matching credentials
   const user = users.find(user => user.username === username && user.password === password);
+  
   if (!user) {
     return res.json({ success: false, message: 'Invalid credentials' });
   }
 
   // Create a session for the user
-  const sessionId = Date.now().toString();
+  const sessionId = Date.now().toString(); // Use a timestamp as a simple session ID
   sessions[sessionId] = { email: user.email, username: user.username };
 
   return res.json({ success: true, message: 'Login successful', sessionId });
@@ -63,6 +70,7 @@ app.post('/login', (req, res) => {
 app.post('/addnote', (req, res) => {
   const { sessionId, title, desc } = req.body;
 
+  // Check if the session is valid
   if (!sessions[sessionId]) {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
@@ -74,13 +82,14 @@ app.post('/addnote', (req, res) => {
   }
 
   notes.push({ id: Date.now(), email: user.email, title, desc });
-  return res.json({ success: true, message: 'Note added' });
+  return res.json({ success: true, message: 'Note added successfully' });
 });
 
 // API: Get notes for a user (Authenticated route)
 app.post('/getnotes', (req, res) => {
   const { sessionId } = req.body;
 
+  // Check if the session is valid
   if (!sessions[sessionId]) {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
@@ -95,16 +104,17 @@ app.post('/getnotes', (req, res) => {
 app.post('/deletenote', (req, res) => {
   const { id, sessionId } = req.body;
 
+  // Check if the session is valid
   if (!sessions[sessionId]) {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
 
   const user = sessions[sessionId];
   notes = notes.filter(note => note.id !== parseInt(id) || note.email !== user.email);
-  return res.json({ success: true, message: 'Note deleted' });
+  return res.json({ success: true, message: 'Note deleted successfully' });
 });
 
 // Start the server
 app.listen(PORT, () => {
-   console.log(`Server running on http://192.168.0.106:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
