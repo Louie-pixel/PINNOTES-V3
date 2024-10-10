@@ -38,12 +38,10 @@ app.get('/newnote', (req, res) => {
 app.post('/register', (req, res) => {
   const { email, username, password } = req.body;
 
-  // Check if the user already exists
   if (users.find(user => user.email === email || user.username === username)) {
     return res.json({ success: false, message: 'User already exists' });
   }
 
-  // Create a new user
   users.push({ email, username, password });
   return res.json({ success: true, message: 'User registered successfully' });
 });
@@ -51,16 +49,13 @@ app.post('/register', (req, res) => {
 // API: Login a user
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
-
-  // Find the user with matching credentials
   const user = users.find(user => user.username === username && user.password === password);
   
   if (!user) {
     return res.json({ success: false, message: 'Invalid credentials' });
   }
 
-  // Create a session for the user
-  const sessionId = Date.now().toString(); // Use a timestamp as a simple session ID
+  const sessionId = Date.now().toString(); 
   sessions[sessionId] = { email: user.email, username: user.username };
 
   return res.json({ success: true, message: 'Login successful', sessionId });
@@ -70,7 +65,6 @@ app.post('/login', (req, res) => {
 app.post('/addnote', (req, res) => {
   const { sessionId, title, desc } = req.body;
 
-  // Check if the session is valid
   if (!sessions[sessionId]) {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
@@ -89,7 +83,6 @@ app.post('/addnote', (req, res) => {
 app.post('/getnotes', (req, res) => {
   const { sessionId } = req.body;
 
-  // Check if the session is valid
   if (!sessions[sessionId]) {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
@@ -104,7 +97,6 @@ app.post('/getnotes', (req, res) => {
 app.post('/deletenote', (req, res) => {
   const { id, sessionId } = req.body;
 
-  // Check if the session is valid
   if (!sessions[sessionId]) {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
