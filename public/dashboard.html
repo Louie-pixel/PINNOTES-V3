@@ -58,6 +58,7 @@
             padding: 15px;
             margin: 10px 0;
             background-color: #fff;
+            position: relative;
         }
         .note-card h4 {
             margin: 0;
@@ -66,6 +67,11 @@
         .note-card p {
             margin: 5px 0;
             font-size: 14px;
+        }
+        .action-dropdown {
+            position: absolute;
+            top: 10px;
+            right: 10px;
         }
     </style>
 </head>
@@ -169,6 +175,17 @@
                         noteCard.innerHTML = `
                             <h4>${note.title}</h4>
                             <p>${note.desc}</p>
+                            <div class="action-dropdown dropdown">
+                                <button class="btn btn-default dropdown-toggle" type="button" id="actionDropdown${note.id}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Actions
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="actionDropdown${note.id}">
+                                    <li><a class="dropdown-item" href="#" onclick="editNote(${note.id})">Edit</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="archiveNote(${note.id})">Archive</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="deleteNote(${note.id})">Delete</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="pinNote(${note.id})">Pin</a></li>
+                                </ul>
+                            </div>
                         `;
                         notesList.appendChild(noteCard);
                     });
@@ -177,6 +194,58 @@
                 }
             })
             .catch(error => console.error('Error:', error));
+        }
+
+        // Edit note function
+        function editNote(noteId) {
+            // Redirect to edit note page (you need to implement this page)
+            window.location.href = `/editnote?id=${noteId}`;
+        }
+
+        // Archive note function
+        function archiveNote(noteId) {
+            const sessionId = localStorage.getItem('sessionId');
+            fetch('/archivenote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId, noteId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Note archived successfully');
+                    fetchNotes();  // Refresh the notes
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Delete note function
+        function deleteNote(noteId) {
+            const sessionId = localStorage.getItem('sessionId');
+            fetch('/deletenote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId, id: noteId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Note deleted successfully');
+                    fetchNotes();  // Refresh the notes
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Pin note function (you may want to implement pinning functionality in the backend)
+        function pinNote(noteId) {
+            alert(`Note with ID ${noteId} pinned!`);
+            // Implement pinning functionality as needed
         }
 
         // Load notes on page load
