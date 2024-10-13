@@ -1,135 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - Pinnotes</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
-      color: #333;
-    }
-    .container {
-      margin: 20px auto;
-      max-width: 800px;
-    }
-    h2 {
-      margin-bottom: 20px;
-    }
-    .note {
-      background-color: white;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      padding: 10px;
-      margin-bottom: 10px;
-    }
-    .btn-custom {
-      background-color: #3498db;
-      color: white;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .btn-custom:hover {
-      background-color: #2980b9;
-    }
-    .search-bar {
-      margin-bottom: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Pinnotes</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        .sidebar {
+            height: 100%;
+            width: 250px;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: #111;
+            padding-top: 20px;
+        }
+        .sidebar a {
+            padding: 10px 15px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: block;
+        }
+        .sidebar a:hover {
+            background-color: #575757;
+        }
+        .content {
+            margin-left: 260px;
+            padding: 20px;
+        }
+        .dropdown-btn {
+            cursor: pointer;
+            font-size: 18px;
+            border: none;
+            outline: none;
+            color: white;
+            background-color: #111;
+            padding: 10px 15px;
+            width: 100%;
+            text-align: left;
+        }
+        .dropdown-container {
+            display: none;
+            background-color: #262626;
+            padding-left: 8px;
+        }
+        .dropdown-container a {
+            font-size: 16px;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Your Notes</h2>
-    <div class="search-bar">
-      <input type="text" id="search" placeholder="Search notes..." class="form-control">
+    <div class="sidebar">
+        <a href="#" class="dropdown-btn">Notes Options</a>
+        <div class="dropdown-container">
+            <a href="#" id="pinNotesBtn">Pin Notes</a>
+            <a href="#" id="archiveNotesBtn">Archive Notes</a>
+            <a href="#" id="createNewNoteBtn">Create New Note</a>
+        </div>
     </div>
-    <button id="newNoteButton" class="btn-custom">Create New Note</button>
-    <div id="noteList"></div>
-  </div>
 
-  <script>
-    let sessionId = localStorage.getItem('sessionId');
+    <div class="content">
+        <h2>Welcome to Your Dashboard</h2>
+        <p>Manage your notes with ease.</p>
+        <div id="notesList"></div>
+    </div>
 
-    // Fetch notes on page load
-    document.addEventListener('DOMContentLoaded', () => {
-      fetchNotes();
-    });
+    <!-- Archive password modal -->
+    <div id="archiveModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Enter Password to View Archived Notes</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="password" id="archivePassword" class="form-control" placeholder="Password">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="submitArchivePassword">Submit</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    // Function to fetch notes
-    function fetchNotes() {
-      fetch('/getnotes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          renderNotes(data.notes);
-        } else {
-          alert(data.message);
-        }
-      })
-      .catch(error => console.error('Error:', error));
-    }
+    <script>
+        // Toggle sidebar dropdown
+        document.querySelector('.dropdown-btn').addEventListener('click', function () {
+            var dropdownContent = this.nextElementSibling;
+            dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+        });
 
-    // Function to render notes
-    function renderNotes(notes) {
-      const noteList = document.getElementById('noteList');
-      noteList.innerHTML = ''; // Clear previous notes
-      notes.forEach(note => {
-        const noteElement = document.createElement('div');
-        noteElement.className = 'note';
-        noteElement.innerHTML = `
-          <h4>${note.title}</h4>
-          <p>${note.desc}</p>
-          <button class="btn-custom" onclick="deleteNote(${note.id})">Delete</button>
-        `;
-        noteList.appendChild(noteElement);
-      });
-    }
+        // Create new note button
+        document.getElementById('createNewNoteBtn').addEventListener('click', function() {
+            window.location.href = '/newnote';  // Redirect to new note page
+        });
 
-    // Function to delete a note
-    function deleteNote(id) {
-      fetch('/deletenote', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, sessionId })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          alert(data.message);
-          fetchNotes(); // Refresh notes
-        } else {
-          alert(data.message);
-        }
-      })
-      .catch(error => console.error('Error:', error));
-    }
+        // Archive notes button
+        document.getElementById('archiveNotesBtn').addEventListener('click', function() {
+            $('#archiveModal').modal('show');  // Show password modal
+        });
 
-    // Create New Note Button
-    document.getElementById('newNoteButton').addEventListener('click', () => {
-      window.location.href = '/newnote'; // Redirect to new note page
-    });
+        // Handle archive password submission
+        document.getElementById('submitArchivePassword').addEventListener('click', function() {
+            const password = document.getElementById('archivePassword').value;
+            const sessionId = localStorage.getItem('sessionId');
+            if (password) {
+                fetch('/archivenotes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId, password })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Archived notes: ' + JSON.stringify(data.archivedNotes));
+                        $('#archiveModal').modal('hide');
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            } else {
+                alert('Please enter your password');
+            }
+        });
+    </script>
 
-    // Search functionality
-    document.getElementById('search').addEventListener('input', function() {
-      const query = this.value.toLowerCase();
-      const notes = document.querySelectorAll('.note');
-      notes.forEach(note => {
-        const title = note.querySelector('h4').textContent.toLowerCase();
-        if (title.includes(query)) {
-          note.style.display = 'block';
-        } else {
-          note.style.display = 'none';
-        }
-      });
-    });
-  </script>
+    <!-- Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </body>
 </html>
