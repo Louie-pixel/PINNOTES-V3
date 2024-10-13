@@ -56,6 +56,11 @@ app.get('/profile', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'profile.html'));
 });
 
+// Serve the new note creation page
+app.get('/newnote', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'newnote.html'));
+});
+
 // API: Register a user
 app.post('/register', (req, res) => {
   const { email, username, password } = req.body;
