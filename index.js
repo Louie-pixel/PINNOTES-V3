@@ -1,133 +1,190 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const path = require('path');
-const app = express();
-const PORT = process.env.PORT || 3000;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Pinnotes</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        .sidebar {
+            height: 100%;
+            width: 250px;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: #111;
+            padding-top: 20px;
+        }
+        .sidebar a {
+            padding: 10px 15px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: block;
+        }
+        .sidebar a:hover {
+            background-color: #575757;
+        }
+        .content {
+            margin-left: 260px;
+            padding: 20px;
+        }
+        .dropdown-btn {
+            cursor: pointer;
+            font-size: 18px;
+            border: none;
+            outline: none;
+            color: white;
+            background-color: #111;
+            padding: 10px 15px;
+            width: 100%;
+            text-align: left;
+        }
+        .dropdown-container {
+            display: none;
+            background-color: #262626;
+            padding-left: 8px;
+        }
+        .dropdown-container a {
+            font-size: 16px;
+        }
+        .note-card {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 10px 0;
+            background-color: #fff;
+        }
+        .note-card h4 {
+            margin: 0;
+            font-size: 18px;
+        }
+        .note-card p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <a href="#" class="dropdown-btn">Notes Options</a>
+        <div class="dropdown-container">
+            <a href="#" id="pinNotesBtn">Pin Notes</a>
+            <a href="#" id="archiveNotesBtn">Archive Notes</a>
+            <a href="#" id="createNewNoteBtn">Create New Note</a>
+        </div>
+    </div>
 
-// In-memory store for users, notes, archived notes, and sessions
-let users = [];
-let notes = [];
-let archivedNotes = [];  // Store archived notes
-let sessions = {};  // Store active sessions by username
+    <div class="content">
+        <h2>Welcome to Your Dashboard</h2>
+        <p>Manage your notes with ease.</p>
+        <div id="notesList">
+            <!-- Notes will be loaded here -->
+        </div>
+    </div>
 
-// Middleware
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
+    <!-- Archive password modal -->
+    <div id="archiveModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Enter Password to View Archived Notes</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="password" id="archivePassword" class="form-control" placeholder="Password">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="submitArchivePassword">Submit</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-// Helper function to check if a user is authenticated
-const isAuthenticated = (sessionId) => {
-  return sessions[sessionId];
-};
+    <script>
+        // Toggle sidebar dropdown
+        document.querySelector('.dropdown-btn').addEventListener('click', function () {
+            var dropdownContent = this.nextElementSibling;
+            dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+        });
 
-// Serve frontend
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+        // Create new note button
+        document.getElementById('createNewNoteBtn').addEventListener('click', function() {
+            window.location.href = '/newnote';  // Redirect to new note page
+        });
 
-app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
+        // Archive notes button
+        document.getElementById('archiveNotesBtn').addEventListener('click', function() {
+            $('#archiveModal').modal('show');  // Show password modal
+        });
 
-app.get('/signup', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'signup.html'));
-});
+        // Handle archive password submission
+        document.getElementById('submitArchivePassword').addEventListener('click', function() {
+            const password = document.getElementById('archivePassword').value;
+            const sessionId = localStorage.getItem('sessionId');
+            if (password) {
+                fetch('/archivenotes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId, password })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Archived notes: ' + JSON.stringify(data.archivedNotes));
+                        $('#archiveModal').modal('hide');
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            } else {
+                alert('Please enter your password');
+            }
+        });
 
-app.get('/dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
-});
+        // Fetch non-archived notes and display them
+        function fetchNotes() {
+            const sessionId = localStorage.getItem('sessionId');
+            fetch('/getnotes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const notesList = document.getElementById('notesList');
+                    notesList.innerHTML = '';  // Clear the list
+                    data.notes.forEach(note => {
+                        const noteCard = document.createElement('div');
+                        noteCard.classList.add('note-card');
+                        noteCard.innerHTML = `
+                            <h4>${note.title}</h4>
+                            <p>${note.desc}</p>
+                        `;
+                        notesList.appendChild(noteCard);
+                    });
+                } else {
+                    alert('Error fetching notes');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
 
-app.get('/newnote', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'newnote.html'));
-});
+        // Load notes on page load
+        fetchNotes();
+    </script>
 
-// API: Register a user
-app.post('/register', (req, res) => {
-  const { email, username, password } = req.body;
-  if (users.find(user => user.email === email || user.username === username)) {
-    return res.json({ success: false, message: 'User already exists' });
-  }
-  users.push({ email, username, password });
-  const sessionId = Date.now().toString();
-  sessions[sessionId] = { email, username };
-  return res.json({ success: true, message: 'User registered', sessionId });
-});
-
-// API: Login a user
-app.post('/login', (req, res) => {
-  const { username, password } = req.body;
-  const user = users.find(user => user.username === username && user.password === password);
-  if (!user) {
-    return res.json({ success: false, message: 'Invalid credentials' });
-  }
-
-  const sessionId = Date.now().toString();
-  sessions[sessionId] = { email: user.email, username: user.username };
-  return res.json({ success: true, message: 'Login successful', sessionId });
-});
-
-// API: Add a note
-app.post('/addnote', (req, res) => {
-  const { sessionId, title, desc } = req.body;
-  const user = sessions[sessionId];
-  if (!user) {
-    return res.json({ success: false, message: 'Unauthorized. Please log in.' });
-  }
-
-  if (!title || !desc) {
-    return res.json({ success: false, message: 'Title and description required' });
-  }
-
-  notes.push({ id: Date.now(), email: user.email, title, desc, archived: false });
-  return res.json({ success: true, message: 'Note added' });
-});
-
-// API: Get notes for a user (non-archived)
-app.post('/getnotes', (req, res) => {
-  const { sessionId } = req.body;
-  const user = sessions[sessionId];
-  if (!user) {
-    return res.json({ success: false, message: 'Unauthorized. Please log in.' });
-  }
-
-  const userNotes = notes.filter(note => note.email === user.email && !note.archived);
-  return res.json({ success: true, notes: userNotes });
-});
-
-// API: Archive notes (password protected)
-app.post('/archivenotes', (req, res) => {
-  const { sessionId, password } = req.body;
-  const user = sessions[sessionId];
-  if (!user) {
-    return res.json({ success: false, message: 'Unauthorized. Please log in.' });
-  }
-
-  const account = users.find(u => u.email === user.email);
-  if (account.password !== password) {
-    return res.json({ success: false, message: 'Incorrect password.' });
-  }
-
-  const archivedUserNotes = notes.filter(note => note.email === user.email && note.archived);
-  return res.json({ success: true, archivedNotes: archivedUserNotes });
-});
-
-// API: Archive a note
-app.post('/archivenote', (req, res) => {
-  const { sessionId, noteId } = req.body;
-  const user = sessions[sessionId];
-  if (!user) {
-    return res.json({ success: false, message: 'Unauthorized. Please log in.' });
-  }
-
-  const note = notes.find(n => n.id === parseInt(noteId) && n.email === user.email);
-  if (note) {
-    note.archived = true;
-    return res.json({ success: true, message: 'Note archived' });
-  } else {
-    return res.json({ success: false, message: 'Note not found' });
-  }
-});
-
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+    <!-- Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</body>
+</html>
