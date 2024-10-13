@@ -91,6 +91,13 @@
             top: 10px;
             right: 10px;
         }
+        .font-select {
+            margin-bottom: 15px;
+        }
+        .font-select select {
+            padding: 5px;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -129,6 +136,24 @@
         </div>
     </div>
 
+    <div class="content" id="createNoteContent" style="display:none;">
+        <h2>Create New Note</h2>
+        <div class="font-select">
+            <label for="fontSelector">Choose a font:</label>
+            <select id="fontSelector">
+                <option value="'Roboto', sans-serif">Roboto</option>
+                <option value="'Arial', sans-serif">Arial</option>
+                <option value="'Courier New', monospace">Courier New</option>
+                <option value="'Georgia', serif">Georgia</option>
+                <option value="'Times New Roman', serif">Times New Roman</option>
+                <option value="'Verdana', sans-serif">Verdana</option>
+                <option value="'Tahoma', sans-serif">Tahoma</option>
+            </select>
+        </div>
+        <textarea id="noteContent" rows="10" placeholder="Write your note here..." style="width: 100%; padding: 10px;"></textarea>
+        <button id="saveNoteBtn">Save Note</button>
+    </div>
+
     <!-- Archive password modal -->
     <div id="archiveModal" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
@@ -160,12 +185,15 @@
         // Profile button click handler
         document.getElementById('profileBtn').addEventListener('click', function () {
             document.getElementById('dashboardContent').style.display = 'none';
+            document.getElementById('createNoteContent').style.display = 'none';
             document.getElementById('profileContent').style.display = 'block';
         });
 
         // Create new note button
         document.getElementById('createNewNoteBtn').addEventListener('click', function() {
-            window.location.href = '/newnote';  // Redirect to new note page
+            document.getElementById('dashboardContent').style.display = 'none';
+            document.getElementById('profileContent').style.display = 'none';
+            document.getElementById('createNoteContent').style.display = 'block';
         });
 
         // Archive notes button
@@ -198,7 +226,7 @@
             }
         });
 
-        // Fetch non-archived notes and display them
+        // Fetch notes function
         function fetchNotes() {
             const sessionId = localStorage.getItem('sessionId');
             fetch('/getnotes', {
@@ -208,20 +236,19 @@
             })
             .then(response => response.json())
             .then(data => {
+                const notesList = document.getElementById('notesList');
+                notesList.innerHTML = ''; // Clear existing notes
                 if (data.success) {
-                    const notesList = document.getElementById('notesList');
-                    notesList.innerHTML = '';  // Clear the list
                     data.notes.forEach(note => {
                         const noteCard = document.createElement('div');
-                        noteCard.classList.add('note-card');
+                        noteCard.className = 'note-card';
+                        noteCard.style.fontFamily = note.font || 'Roboto, sans-serif'; // Set font
                         noteCard.innerHTML = `
                             <h4>${note.title}</h4>
-                            <p>${note.desc}</p>
-                            <div class="action-dropdown dropdown">
-                                <button class="btn btn-default dropdown-toggle" type="button" id="actionDropdown${note.id}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Actions
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="actionDropdown${note.id}">
+                            <p>${note.content}</p>
+                            <div class="action-dropdown">
+                                <button class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">Actions</button>
+                                <ul class="dropdown-menu">
                                     <li><a class="dropdown-item" href="#" onclick="editNote(${note.id})">Edit</a></li>
                                     <li><a class="dropdown-item" href="#" onclick="archiveNote(${note.id})">Archive</a></li>
                                     <li><a class="dropdown-item" href="#" onclick="deleteNote(${note.id})">Delete</a></li>
@@ -236,6 +263,35 @@
             })
             .catch(error => console.error('Error:', error));
         }
+
+        // Save new note function
+        document.getElementById('saveNoteBtn').addEventListener('click', function() {
+            const noteContent = document.getElementById('noteContent').value;
+            const font = document.getElementById('fontSelector').value;
+            const sessionId = localStorage.getItem('sessionId');
+            if (noteContent) {
+                fetch('/savenote', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId, content: noteContent, font: font })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Note saved successfully!');
+                        document.getElementById('noteContent').value = ''; // Clear textarea
+                        fetchNotes();  // Refresh the notes list
+                        document.getElementById('createNoteContent').style.display = 'none';
+                        document.getElementById('dashboardContent').style.display = 'block';
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            } else {
+                alert('Please enter your note content');
+            }
+        });
 
         // Edit note function (to be implemented)
         function editNote(noteId) {
