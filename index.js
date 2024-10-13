@@ -13,6 +13,11 @@ let sessions = {};  // Store active sessions by username
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Helper function to check if a user is authenticated
+const isAuthenticated = (sessionId) => {
+  return sessions[sessionId];
+};
+
 // Serve frontend
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -34,7 +39,7 @@ app.get('/newnote', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'newnote.html'));
 });
 
-// API: Register a user
+// API: Register a user and log them in automatically
 app.post('/register', (req, res) => {
   const { email, username, password } = req.body;
 
@@ -42,19 +47,27 @@ app.post('/register', (req, res) => {
     return res.json({ success: false, message: 'User already exists' });
   }
 
+  // Register user
   users.push({ email, username, password });
-  return res.json({ success: true, message: 'User registered successfully' });
+
+  // Automatically log in the user after registration
+  const sessionId = Date.now().toString(); 
+  sessions[sessionId] = { email, username };
+
+  // Return the session ID for the user to stay logged in
+  return res.json({ success: true, message: 'User registered and logged in', sessionId });
 });
 
 // API: Login a user
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
   const user = users.find(user => user.username === username && user.password === password);
-  
+
   if (!user) {
     return res.json({ success: false, message: 'Invalid credentials' });
   }
 
+  // Create a session for the user
   const sessionId = Date.now().toString(); 
   sessions[sessionId] = { email: user.email, username: user.username };
 
@@ -65,7 +78,7 @@ app.post('/login', (req, res) => {
 app.post('/addnote', (req, res) => {
   const { sessionId, title, desc } = req.body;
 
-  if (!sessions[sessionId]) {
+  if (!isAuthenticated(sessionId)) {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
 
@@ -83,7 +96,7 @@ app.post('/addnote', (req, res) => {
 app.post('/getnotes', (req, res) => {
   const { sessionId } = req.body;
 
-  if (!sessions[sessionId]) {
+  if (!isAuthenticated(sessionId)) {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
 
@@ -97,7 +110,7 @@ app.post('/getnotes', (req, res) => {
 app.post('/deletenote', (req, res) => {
   const { id, sessionId } = req.body;
 
-  if (!sessions[sessionId]) {
+  if (!isAuthenticated(sessionId)) {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
 
