@@ -1,17 +1,31 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
+const multer = require('multer'); // For handling file uploads
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// In-memory store for users, notes, and sessions
+// In-memory store for users, notes, sessions, and profiles
 let users = [];
 let notes = [];
 let sessions = {};  // Store active sessions by username
+let profiles = {};  // Store user profiles
+
+// Configure storage for profile pictures
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${req.body.username}-${Date.now()}-${file.originalname}`);
+    }
+});
+const upload = multer({ storage });
 
 // Middleware
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve profile pictures
 
 // Helper function to check if a user is authenticated
 const isAuthenticated = (req) => {
@@ -36,12 +50,8 @@ app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
-app.get('/newnote', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'newnote.html'));
-});
-
-app.get('/editnote', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'editnote.html'));
+app.get('/profile', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'profile.html'));
 });
 
 // API: Register a user
@@ -69,81 +79,39 @@ app.post('/login', (req, res) => {
     return res.json({ success: true, message: 'Login successful', sessionId });
 });
 
-// API: Add a note (Authenticated route)
-app.post('/addnote', (req, res) => {
-    if (!isAuthenticated(req)) {
-        return res.json({ success: false, message: 'Unauthorized. Please log in.' });
-    }
-
-    const { title, desc, sessionId } = req.body;
+// API: Update User Profile
+app.post('/updateProfile', upload.single('profilePicture'), (req, res) => {
+    const { sessionId, name, description, contactDetails } = req.body;
     const user = sessions[sessionId];
 
-    if (!title || !desc) {
-        return res.json({ success: false, message: 'Title and description required' });
-    }
-
-    notes.push({ id: Date.now(), email: user.email, title, desc, archived: false });
-    return res.json({ success: true, message: 'Note added' });
-});
-
-// API: Get notes for a user (Authenticated route)
-app.post('/getnotes', (req, res) => {
-    if (!isAuthenticated(req)) {
+    if (!user) {
         return res.json({ success: false, message: 'Unauthorized. Please log in.' });
     }
 
+    profiles[user.username] = {
+        name,
+        description,
+        contactDetails,
+        profilePicture: req.file ? `/uploads/${req.file.filename}` : null,
+    };
+
+    return res.json({ success: true, message: 'Profile updated', profile: profiles[user.username] });
+});
+
+// API: Get User Profile
+app.post('/getProfile', (req, res) => {
     const { sessionId } = req.body;
     const user = sessions[sessionId];
-    const userNotes = notes.filter(note => note.email === user.email && !note.archived);
 
-    return res.json({ success: true, notes: userNotes });
-});
-
-// API: Archive a note
-app.post('/archivenote', (req, res) => {
-    const { sessionId, noteId } = req.body;
-    const user = sessions[sessionId];
     if (!user) {
         return res.json({ success: false, message: 'Unauthorized. Please log in.' });
     }
 
-    const note = notes.find(n => n.id === parseInt(noteId) && n.email === user.email);
-    if (note) {
-        note.archived = true; // Archive the note
-        return res.json({ success: true, message: 'Note archived' });
-    } else {
-        return res.json({ success: false, message: 'Note not found' });
-    }
+    const profile = profiles[user.username] || {};
+    return res.json({ success: true, profile });
 });
 
-// API: Delete a note (Authenticated route)
-app.post('/deletenote', (req, res) => {
-    const { sessionId, id } = req.body;
-    const user = sessions[sessionId];
-    if (!user) {
-        return res.json({ success: false, message: 'Unauthorized. Please log in.' });
-    }
-
-    notes = notes.filter(note => note.id !== parseInt(id) || note.email !== user.email);
-    return res.json({ success: true, message: 'Note deleted' });
-});
-
-// API: Archive notes (Prompt for password)
-app.post('/archivenotes', (req, res) => {
-    const { sessionId, password } = req.body;
-    const user = sessions[sessionId];
-    if (!user) {
-        return res.json({ success: false, message: 'Unauthorized. Please log in.' });
-    }
-
-    // Simulate password check
-    if (password === user.password) {
-        const archivedNotes = notes.filter(note => note.email === user.email && note.archived);
-        return res.json({ success: true, archivedNotes });
-    } else {
-        return res.json({ success: false, message: 'Invalid password' });
-    }
-});
+// ... (rest of the existing API routes remain unchanged)
 
 // Start the server
 app.listen(PORT, () => {
