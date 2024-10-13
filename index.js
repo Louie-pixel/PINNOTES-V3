@@ -111,7 +111,79 @@ app.post('/getProfile', (req, res) => {
     return res.json({ success: true, profile });
 });
 
-// ... (rest of the existing API routes remain unchanged)
+// API: Add a note (Authenticated route)
+app.post('/addnote', (req, res) => {
+    if (!isAuthenticated(req)) {
+        return res.json({ success: false, message: 'Unauthorized. Please log in.' });
+    }
+
+    const { title, desc, sessionId } = req.body;
+    const user = sessions[sessionId];
+
+    if (!title || !desc) {
+        return res.json({ success: false, message: 'Title and description required' });
+    }
+
+    notes.push({ id: Date.now(), email: user.email, title, desc, archived: false, pinned: false });
+    return res.json({ success: true, message: 'Note added' });
+});
+
+// API: Get notes for a user (Authenticated route)
+app.post('/getnotes', (req, res) => {
+    if (!isAuthenticated(req)) {
+        return res.json({ success: false, message: 'Unauthorized. Please log in.' });
+    }
+
+    const { sessionId } = req.body;
+    const user = sessions[sessionId];
+    const userNotes = notes.filter(note => note.email === user.email && !note.archived);
+
+    return res.json({ success: true, notes: userNotes });
+});
+
+// API: Archive a note (Authenticated route)
+app.post('/archivenote', (req, res) => {
+    if (!isAuthenticated(req)) {
+        return res.json({ success: false, message: 'Unauthorized. Please log in.' });
+    }
+
+    const { id, sessionId } = req.body;
+    const user = sessions[sessionId];
+
+    notes.forEach(note => {
+        if (note.id === parseInt(id) && note.email === user.email) {
+            note.archived = true;
+        }
+    });
+
+    return res.json({ success: true, message: 'Note archived' });
+});
+
+// API: Get archived notes for a user (Authenticated route)
+app.post('/getarchivednotes', (req, res) => {
+    if (!isAuthenticated(req)) {
+        return res.json({ success: false, message: 'Unauthorized. Please log in.' });
+    }
+
+    const { sessionId } = req.body;
+    const user = sessions[sessionId];
+    const archivedNotes = notes.filter(note => note.email === user.email && note.archived);
+
+    return res.json({ success: true, notes: archivedNotes });
+});
+
+// API: Delete a note (Authenticated route)
+app.post('/deletenote', (req, res) => {
+    if (!isAuthenticated(req)) {
+        return res.json({ success: false, message: 'Unauthorized. Please log in.' });
+    }
+
+    const { id, sessionId } = req.body;
+    const user = sessions[sessionId];
+
+    notes = notes.filter(note => note.id !== parseInt(id) || note.email !== user.email);
+    return res.json({ success: true, message: 'Note deleted' });
+});
 
 // Start the server
 app.listen(PORT, () => {
