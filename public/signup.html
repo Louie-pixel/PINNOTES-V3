@@ -57,9 +57,11 @@
       })
       .then(response => response.json())
       .then(data => {
-        alert(data.message);
         if (data.success) {
-          window.location.href = '/login';  // Redirect to login after registration
+          localStorage.setItem('sessionId', data.sessionId);  // Store sessionId
+          window.location.href = '/dashboard';  // Redirect to dashboard after signup
+        } else {
+          alert(data.message);
         }
       })
       .catch(error => console.error('Error:', error));
