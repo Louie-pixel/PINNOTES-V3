@@ -1,110 +1,98 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Create New Note - My Note-Taking Web App</title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Note</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="https://fonts.cdnfonts.com/css/callie-chalk-font" rel="stylesheet">
-  
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
   <style>
     body {
-      background: url("assets/chalkboard.jpg") no-repeat center center fixed;
+      font-family: 'Roboto', sans-serif;
+      background-image: url('chalkboard.jpg');
       background-size: cover;
-      background-color: #2d2b2c;
-    }
-
-    /* Works on Firefox */
-    * {
-      scrollbar-width: thin;
-      scrollbar-color: rgba(233, 161, 175, 0.7) rgba(233, 161, 175, 0.4);
-    }
-
-    /* Works on Chrome, Edge, and Safari */
-    *::-webkit-scrollbar {
-      width: 12px;
-    }
-
-    *::-webkit-scrollbar-track {
-      background: rgba(233, 161, 175, 0.4);
-    }
-
-    *::-webkit-scrollbar-thumb {
-      background-color: rgba(233, 161, 175, 0.7);
-      border-radius: 20px;
-      border: 3px solid rgba(233, 161, 175, 0.4);
-    }
-    
-    .note-form {
-      background-color: rgba(255, 255, 255, 0.9);
+      color: white;
       padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
-    
-    .btn-custom {
-      background-color: rgba(233, 161, 175, 0.7);
-      border-color: rgba(233, 161, 175, 0.7);
+    .note-container {
+      max-width: 800px;
+      margin: auto;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
     }
-
-    .btn-custom:hover {
-      background-color: rgba(233, 161, 175, 0.9);
-      border-color: rgba(233, 161, 175, 0.9);
+    .note-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .note-header h2 {
+      margin: 0;
+    }
+    .note-form select, .note-form input, .note-form textarea {
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .note-form button {
+      background-color: #007bff;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .note-form button:hover {
+      background-color: #0056b3;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1 class="text-center">Create New Note</h1>
-    <div class="row justify-content-center">
-      <div class="col-md-6 note-form">
-        <form id="newNoteForm">
-          <div class="form-group">
-            <label for="title">Note Title</label>
-            <input type="text" id="title" class="form-control" placeholder="Enter note title" required />
-          </div>
-          <div class="form-group">
-            <label for="desc">Note Description</label>
-            <textarea id="desc" class="form-control" placeholder="Enter note description" rows="5" required></textarea>
-          </div>
-          <button type="submit" class="btn btn-custom btn-block">Add Note</button>
-        </form>
-      </div>
-    </div>
+
+<div class="note-container">
+  <div class="note-header">
+    <h2>Create a New Note</h2>
   </div>
+  <form class="note-form" id="noteForm">
+    <select id="fontSelector" onchange="updateFont()">
+      <option value="Arial">Arial</option>
+      <option value="Courier New">Courier New</option>
+      <option value="Georgia">Georgia</option>
+      <option value="Times New Roman">Times New Roman</option>
+      <option value="Verdana">Verdana</option>
+      <option value="Comic Sans MS">Comic Sans MS</option>
+      <option value="Impact">Impact</option>
+      <option value="Tahoma">Tahoma</option>
+      <option value="Trebuchet MS">Trebuchet MS</option>
+      <option value="Lucida Console">Lucida Console</option>
+      <!-- Add more fonts as needed -->
+    </select>
+    <input type="number" id="fontSize" placeholder="Font Size (px)" value="16" min="8" max="72" onchange="updateFont()">
+    <textarea id="noteContent" rows="10" placeholder="Write your note here..." style="font-size: 16px; font-family: Arial;"></textarea>
+    <button type="submit">Save Note</button>
+  </form>
+</div>
 
-  <script>
-    document.getElementById('newNoteForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const title = document.getElementById('title').value;
-      const desc = document.getElementById('desc').value;
+<script>
+  function updateFont() {
+    const fontSize = document.getElementById('fontSize').value + 'px';
+    const fontFamily = document.getElementById('fontSelector').value;
+    document.getElementById('noteContent').style.fontSize = fontSize;
+    document.getElementById('noteContent').style.fontFamily = fontFamily;
+  }
 
-      // Fetch sessionId from local storage or your preferred method
-      const sessionId = localStorage.getItem('sessionId');
+  document.getElementById('noteForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+    const noteContent = document.getElementById('noteContent').value;
+    // Here you would typically handle saving the note
+    console.log('Note saved:', noteContent);
+    alert('Note saved successfully!');
+    document.getElementById('noteContent').value = ''; // Clear the textarea
+  });
+</script>
 
-      const response = await fetch('/addnote', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ title, desc, sessionId })
-      });
-
-      const result = await response.json();
-      alert(result.message);
-      if (result.success) {
-        // Redirect or reset the form
-        window.location.href = '/dashboard'; // Redirect to dashboard
-      }
-    });
-  </script>
 </body>
 </html>
