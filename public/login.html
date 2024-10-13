@@ -55,6 +55,7 @@
       .then(response => response.json())
       .then(data => {
         if (data.success) {
+          localStorage.setItem('sessionId', data.sessionId);  // Store sessionId
           window.location.href = '/dashboard';  // Redirect to dashboard after login
         } else {
           alert(data.message);
