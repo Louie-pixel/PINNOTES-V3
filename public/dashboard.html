@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Pinnotes</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             background-color: #f5f5f5;
         }
         .sidebar {
@@ -34,24 +36,40 @@
             margin-left: 260px;
             padding: 20px;
         }
-        .dropdown-btn {
-            cursor: pointer;
-            font-size: 18px;
-            border: none;
-            outline: none;
-            color: white;
-            background-color: #111;
-            padding: 10px 15px;
+        .profile-container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .profile-header {
+            text-align: center;
+        }
+        .profile-header img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+        }
+        .profile-form input, .profile-form textarea {
             width: 100%;
-            text-align: left;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
-        .dropdown-container {
-            display: none;
-            background-color: #262626;
-            padding-left: 8px;
+        .profile-form button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
-        .dropdown-container a {
-            font-size: 16px;
+        .profile-form button:hover {
+            background-color: #0056b3;
         }
         .note-card {
             border: 1px solid #ccc;
@@ -83,13 +101,31 @@
             <a href="#" id="archiveNotesBtn">Archive Notes</a>
             <a href="#" id="createNewNoteBtn">Create New Note</a>
         </div>
+        <a href="#" id="profileBtn" class="profile-btn">Profile</a>
     </div>
 
-    <div class="content">
+    <div class="content" id="dashboardContent">
         <h2>Welcome to Your Dashboard</h2>
         <p>Manage your notes with ease.</p>
         <div id="notesList">
             <!-- Notes will be loaded here -->
+        </div>
+    </div>
+
+    <div class="content" id="profileContent" style="display:none;">
+        <div class="profile-container">
+            <div class="profile-header">
+                <h2>Your Profile</h2>
+                <img id="profileImage" src="/default-profile.png" alt="Profile Image">
+            </div>
+            <form class="profile-form" id="profileForm" enctype="multipart/form-data">
+                <input type="text" name="name" id="name" placeholder="Your Name" required>
+                <input type="email" name="email" id="email" placeholder="Your Email" required>
+                <input type="text" name="contact" id="contact" placeholder="Your Contact Details">
+                <textarea name="description" id="description" rows="4" placeholder="Describe yourself"></textarea>
+                <input type="file" name="profileImage" id="profileImageUpload" accept="image/*">
+                <button type="submit">Update Profile</button>
+            </form>
         </div>
     </div>
 
@@ -119,6 +155,12 @@
         document.querySelector('.dropdown-btn').addEventListener('click', function () {
             var dropdownContent = this.nextElementSibling;
             dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Profile button click handler
+        document.getElementById('profileBtn').addEventListener('click', function () {
+            document.getElementById('dashboardContent').style.display = 'none';
+            document.getElementById('profileContent').style.display = 'block';
         });
 
         // Create new note button
@@ -183,23 +225,21 @@
                                     <li><a class="dropdown-item" href="#" onclick="editNote(${note.id})">Edit</a></li>
                                     <li><a class="dropdown-item" href="#" onclick="archiveNote(${note.id})">Archive</a></li>
                                     <li><a class="dropdown-item" href="#" onclick="deleteNote(${note.id})">Delete</a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="pinNote(${note.id})">Pin</a></li>
                                 </ul>
                             </div>
                         `;
                         notesList.appendChild(noteCard);
                     });
                 } else {
-                    alert('Error fetching notes');
+                    alert(data.message);
                 }
             })
             .catch(error => console.error('Error:', error));
         }
 
-        // Edit note function
+        // Edit note function (to be implemented)
         function editNote(noteId) {
-            // Redirect to edit note page (you need to implement this page)
-            window.location.href = `/editnote?id=${noteId}`;
+            alert('Edit note functionality not implemented yet.');
         }
 
         // Archive note function
@@ -213,8 +253,8 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Note archived successfully');
-                    fetchNotes();  // Refresh the notes
+                    alert('Note archived successfully!');
+                    fetchNotes();  // Refresh the notes list
                 } else {
                     alert(data.message);
                 }
@@ -233,8 +273,8 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Note deleted successfully');
-                    fetchNotes();  // Refresh the notes
+                    alert('Note deleted successfully!');
+                    fetchNotes();  // Refresh the notes list
                 } else {
                     alert(data.message);
                 }
@@ -242,17 +282,29 @@
             .catch(error => console.error('Error:', error));
         }
 
-        // Pin note function (you may want to implement pinning functionality in the backend)
-        function pinNote(noteId) {
-            alert(`Note with ID ${noteId} pinned!`);
-            // Implement pinning functionality as needed
-        }
+        // Profile form submission
+        document.getElementById('profileForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch('/updateprofile', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Profile updated successfully!');
+                    document.getElementById('profileImage').src = `/uploads/${data.profileImage}`;
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
 
-        // Load notes on page load
-        fetchNotes();
+        // Fetch notes on page load
+        window.onload = fetchNotes;
     </script>
-
-    <!-- Bootstrap JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </body>
