@@ -107,7 +107,6 @@
             <a href="#" id="pinNotesBtn">Pin Notes</a>
             <a href="#" id="archiveNotesBtn">Archive Notes</a>
             <a href="#" id="createNewNoteBtn">Create New Note</a>
-            <a href="#" id="setReminderBtn">Set Reminder</a>
         </div>
     </div>
 
@@ -151,15 +150,6 @@
         // Create new note button
         document.getElementById('createNewNoteBtn').addEventListener('click', function() {
             window.location.href = '/newnote';  // Redirect to new note page
-        });
-
-        // Set reminder button
-        document.getElementById('setReminderBtn').addEventListener('click', function() {
-            let reminderTime = prompt("Enter reminder time (e.g., '2024-10-15T09:00')");
-            if (reminderTime) {
-                // Handle setting the reminder here
-                alert(`Reminder set for: ${reminderTime}`);
-            }
         });
 
         // Archive notes button
@@ -218,6 +208,8 @@
                             <div class="note-colors">
                                 <div class="note-color" style="background-color:${note.color}"></div>
                             </div>
+                            <p>Reminder: ${note.reminder ? new Date(note.reminder).toLocaleString() : 'None'}</p>
+                            <button class="btn btn-primary set-reminder-btn" data-id="${note.id}">Set Reminder</button>
                             <div class="action-dropdown dropdown">
                                 <button class="btn btn-default dropdown-toggle" type="button" id="actionDropdown${note.id}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Actions
@@ -232,14 +224,45 @@
                         `;
                         notesList.appendChild(noteCard);
                     });
+
+                    // Add event listeners to all set reminder buttons
+                    document.querySelectorAll('.set-reminder-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const noteId = this.getAttribute('data-id');
+                            const reminderTime = prompt("Enter reminder time (e.g., '2024-10-15T09:00')");
+                            if (reminderTime) {
+                                setReminder(noteId, reminderTime);
+                            }
+                        });
+                    });
                 } else {
-                    alert('Error fetching notes');
+                    alert(data.message);
                 }
             })
             .catch(error => console.error('Error:', error));
         }
 
-        // Search notes
+        // Set reminder for a specific note
+        function setReminder(noteId, reminderTime) {
+            const sessionId = localStorage.getItem('sessionId');
+            fetch('/setreminder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId, noteId, reminder: reminderTime })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Reminder set successfully!');
+                    fetchNotes();  // Refresh the notes to show updated reminder
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Search notes functionality
         document.getElementById('searchNotes').addEventListener('input', function() {
             const searchQuery = this.value.toLowerCase();
             const notes = document.querySelectorAll('.note-card');
