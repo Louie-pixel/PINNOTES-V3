@@ -125,6 +125,8 @@
             const sessionId = localStorage.getItem('sessionId');
             if (!sessionId) {
                 window.location.href = 'login.html'; // Redirect to login page
+            } else {
+                fetchNotes();  // Fetch notes only if logged in
             }
         });
 
@@ -137,11 +139,6 @@
         // Create new note button
         document.getElementById('createNewNoteBtn').addEventListener('click', function() {
             window.location.href = '/newnote';  // Redirect to new note page
-        });
-
-        // Archive notes button
-        document.getElementById('archiveNotesBtn').addEventListener('click', function() {
-            $('#archiveModal').modal('show');  // Show password modal
         });
 
         // Fetch non-archived notes and display them
@@ -167,56 +164,10 @@
                             <h4>${note.title}</h4>
                             <p>${note.desc}</p>
                             ${note.tags ? note.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : ''}
-                            <div class="note-colors">
-                                <div class="note-color" style="background-color:${note.color}"></div>
-                            </div>
                             <p>Reminder: ${note.reminder ? new Date(note.reminder).toLocaleString() : 'None'}</p>
-                            <button class="btn btn-primary set-reminder-btn" data-id="${note.id}">Set Reminder</button>
-                            <div class="action-dropdown dropdown">
-                                <button class="btn btn-default dropdown-toggle" type="button" id="actionDropdown${note.id}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Actions
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="actionDropdown${note.id}">
-                                    <li><a class="dropdown-item" href="#" onclick="editNote(${note.id})">Edit</a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="archiveNote(${note.id})">Archive</a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="deleteNote(${note.id})">Delete</a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="pinNote(${note.id})">Pin</a></li>
-                                </ul>
-                            </div>
                         `;
                         notesList.appendChild(noteCard);
                     });
-
-                    // Add event listeners to all set reminder buttons
-                    document.querySelectorAll('.set-reminder-btn').forEach(btn => {
-                        btn.addEventListener('click', function() {
-                            const noteId = this.getAttribute('data-id');
-                            const reminderTime = prompt("Enter reminder time (e.g., '2024-10-15T09:00')");
-                            if (reminderTime) {
-                                setReminder(noteId, reminderTime);
-                            }
-                        });
-                    });
-                } else {
-                    alert(data.message);
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        }
-
-        // Set reminder for a specific note
-        function setReminder(noteId, reminderTime) {
-            const sessionId = localStorage.getItem('sessionId');
-            fetch('/setreminder', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId, noteId, reminder: reminderTime })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Reminder set successfully!');
-                    fetchNotes();  // Refresh the notes to show updated reminder
                 } else {
                     alert(data.message);
                 }
@@ -233,9 +184,6 @@
                 note.style.display = title.includes(searchQuery) ? '' : 'none';
             });
         });
-
-        // Load notes on page load
-        fetchNotes();
     </script>
 
     <!-- Bootstrap JS -->
