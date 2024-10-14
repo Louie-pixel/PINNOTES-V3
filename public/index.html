@@ -120,11 +120,11 @@
     </div>
 
     <script>
-        // Redirect to login if session is not found
+        // Redirect to landing page if session is not found
         document.addEventListener('DOMContentLoaded', function() {
             const sessionId = localStorage.getItem('sessionId');
             if (!sessionId) {
-                window.location.href = 'login.html'; // Redirect to login page
+                window.location.href = 'landing.html'; // Redirect to landing page
             } else {
                 fetchNotes();  // Fetch notes only if logged in
             }
