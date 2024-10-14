@@ -35,7 +35,8 @@ const isAuthenticated = (sessionId) => {
 
 // Serve frontend (main pages)
 app.get('/', (req, res) => {
-    res.redirect('/login'); // Redirect to login page first
+    // Redirect to login page if no session exists
+    res.redirect('/login'); // Always redirect to login first
 });
 
 app.get('/login', (req, res) => {
@@ -47,16 +48,35 @@ app.get('/signup', (req, res) => {
 });
 
 app.get('/dashboard', (req, res) => {
+    // Check for a valid session before serving the dashboard
+    const sessionId = req.query.sessionId; // Get sessionId from query params
+
+    if (!isAuthenticated(sessionId)) {
+        return res.redirect('/login'); // Redirect to login if not authenticated
+    }
+
     res.sendFile(path.join(__dirname, 'public', 'index.html')); // dashboard.html should be index.html
 });
 
 // Serve the profile page
 app.get('/profile', (req, res) => {
+    const sessionId = req.query.sessionId; // Get sessionId from query params
+
+    if (!isAuthenticated(sessionId)) {
+        return res.redirect('/login'); // Redirect to login if not authenticated
+    }
+
     res.sendFile(path.join(__dirname, 'public', 'profile.html'));
 });
 
 // Serve the new note creation page
 app.get('/newnote', (req, res) => {
+    const sessionId = req.query.sessionId; // Get sessionId from query params
+
+    if (!isAuthenticated(sessionId)) {
+        return res.redirect('/login'); // Redirect to login if not authenticated
+    }
+
     res.sendFile(path.join(__dirname, 'public', 'newnote.html'));
 });
 
