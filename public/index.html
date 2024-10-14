@@ -119,28 +119,15 @@
         </div>
     </div>
 
-    <!-- Archive password modal -->
-    <div id="archiveModal" class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Enter Password to View Archived Notes</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <input type="password" id="archivePassword" class="form-control" placeholder="Password">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="submitArchivePassword">Submit</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
+        // Redirect to login if session is not found
+        document.addEventListener('DOMContentLoaded', function() {
+            const sessionId = localStorage.getItem('sessionId');
+            if (!sessionId) {
+                window.location.href = 'login.html'; // Redirect to login page
+            }
+        });
+
         // Toggle sidebar dropdown
         document.querySelector('.dropdown-btn').addEventListener('click', function () {
             var dropdownContent = this.nextElementSibling;
@@ -155,31 +142,6 @@
         // Archive notes button
         document.getElementById('archiveNotesBtn').addEventListener('click', function() {
             $('#archiveModal').modal('show');  // Show password modal
-        });
-
-        // Handle archive password submission
-        document.getElementById('submitArchivePassword').addEventListener('click', function() {
-            const password = document.getElementById('archivePassword').value;
-            const sessionId = localStorage.getItem('sessionId');
-            if (password) {
-                fetch('/archivenotes', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sessionId, password })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Archived notes: ' + JSON.stringify(data.archivedNotes));
-                        $('#archiveModal').modal('hide');
-                    } else {
-                        alert(data.message);
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-            } else {
-                alert('Please enter your password');
-            }
         });
 
         // Fetch non-archived notes and display them
@@ -271,57 +233,6 @@
                 note.style.display = title.includes(searchQuery) ? '' : 'none';
             });
         });
-
-        // Edit note function
-        function editNote(noteId) {
-            window.location.href = `/editnote?id=${noteId}`;  // Redirect to edit note page
-        }
-
-        // Archive note function
-        function archiveNote(noteId) {
-            const sessionId = localStorage.getItem('sessionId');
-            fetch('/archivenote', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId, noteId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Note archived successfully');
-                    fetchNotes();  // Refresh the notes
-                } else {
-                    alert(data.message);
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        }
-
-        // Delete note function
-        function deleteNote(noteId) {
-            const sessionId = localStorage.getItem('sessionId');
-            fetch('/deletenote', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId, id: noteId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Note deleted successfully');
-                    fetchNotes();  // Refresh the notes
-                } else {
-                    alert(data.message);
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        }
-
-        // Pin note function
-        function pinNote(noteId) {
-            alert(`Note with ID ${noteId} pinned!`);
-            // Implement pinning functionality as needed
-        }
 
         // Load notes on page load
         fetchNotes();
