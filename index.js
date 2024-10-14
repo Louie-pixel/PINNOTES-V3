@@ -36,7 +36,7 @@ const isAuthenticated = (req) => {
 
 // Serve frontend (main pages)
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'login.html')); // Redirect to login page first
 });
 
 app.get('/login', (req, res) => {
@@ -48,7 +48,7 @@ app.get('/signup', (req, res) => {
 });
 
 app.get('/dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html')); // dashboard.html should be index.html
 });
 
 // Serve the profile page
