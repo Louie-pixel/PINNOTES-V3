@@ -59,6 +59,7 @@
             margin: 10px 0;
             background-color: #fff;
             position: relative;
+            border-left: 5px solid #007bff;
         }
         .note-card h4 {
             margin: 0;
@@ -68,10 +69,34 @@
             margin: 5px 0;
             font-size: 14px;
         }
+        .note-card .tag {
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            padding: 5px;
+            display: inline-block;
+            margin-right: 5px;
+        }
         .action-dropdown {
             position: absolute;
             top: 10px;
             right: 10px;
+        }
+        .note-color {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+        .priority-high {
+            border-color: red;
+        }
+        .priority-medium {
+            border-color: orange;
+        }
+        .priority-low {
+            border-color: green;
         }
     </style>
 </head>
@@ -82,11 +107,13 @@
             <a href="#" id="pinNotesBtn">Pin Notes</a>
             <a href="#" id="archiveNotesBtn">Archive Notes</a>
             <a href="#" id="createNewNoteBtn">Create New Note</a>
+            <a href="#" id="setReminderBtn">Set Reminder</a>
         </div>
     </div>
 
     <div class="content">
         <h2>Welcome to Your Dashboard</h2>
+        <input type="text" id="searchNotes" class="form-control" placeholder="Search notes...">
         <p>Manage your notes with ease.</p>
         <div id="notesList">
             <!-- Notes will be loaded here -->
@@ -124,6 +151,15 @@
         // Create new note button
         document.getElementById('createNewNoteBtn').addEventListener('click', function() {
             window.location.href = '/newnote';  // Redirect to new note page
+        });
+
+        // Set reminder button
+        document.getElementById('setReminderBtn').addEventListener('click', function() {
+            let reminderTime = prompt("Enter reminder time (e.g., '2024-10-15T09:00')");
+            if (reminderTime) {
+                // Handle setting the reminder here
+                alert(`Reminder set for: ${reminderTime}`);
+            }
         });
 
         // Archive notes button
@@ -172,9 +208,16 @@
                     data.notes.forEach(note => {
                         const noteCard = document.createElement('div');
                         noteCard.classList.add('note-card');
+                        noteCard.classList.add(note.priority ? `priority-${note.priority}` : '');
+
+                        // Color coding and tags
                         noteCard.innerHTML = `
                             <h4>${note.title}</h4>
                             <p>${note.desc}</p>
+                            ${note.tags ? note.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : ''}
+                            <div class="note-colors">
+                                <div class="note-color" style="background-color:${note.color}"></div>
+                            </div>
                             <div class="action-dropdown dropdown">
                                 <button class="btn btn-default dropdown-toggle" type="button" id="actionDropdown${note.id}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Actions
@@ -196,10 +239,19 @@
             .catch(error => console.error('Error:', error));
         }
 
+        // Search notes
+        document.getElementById('searchNotes').addEventListener('input', function() {
+            const searchQuery = this.value.toLowerCase();
+            const notes = document.querySelectorAll('.note-card');
+            notes.forEach(note => {
+                const title = note.querySelector('h4').textContent.toLowerCase();
+                note.style.display = title.includes(searchQuery) ? '' : 'none';
+            });
+        });
+
         // Edit note function
         function editNote(noteId) {
-            // Redirect to edit note page (you need to implement this page)
-            window.location.href = `/editnote?id=${noteId}`;
+            window.location.href = `/editnote?id=${noteId}`;  // Redirect to edit note page
         }
 
         // Archive note function
@@ -242,7 +294,7 @@
             .catch(error => console.error('Error:', error));
         }
 
-        // Pin note function (you may want to implement pinning functionality in the backend)
+        // Pin note function
         function pinNote(noteId) {
             alert(`Note with ID ${noteId} pinned!`);
             // Implement pinning functionality as needed
