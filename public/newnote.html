@@ -3,114 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create New Note</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-image: url('chalkboard.jpg');
-            background-size: cover;
-            color: white;
-            padding: 20px;
-        }
-        .note-container {
-            max-width: 800px;
-            margin: auto;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-        }
-        .note-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .note-header h2 {
-            margin: 0;
-        }
-        .note-form select, .note-form input, .note-form textarea {
-            width: 100%;
-            margin-bottom: 15px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .note-form button {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .note-form button:hover {
-            background-color: #0056b3;
-        }
-    </style>
+    <title>Create Note</title>
 </head>
 <body>
-
-<div class="note-container">
-    <div class="note-header">
-        <h2>Create a New Note</h2>
-    </div>
-    <form class="note-form" id="noteForm">
-        <select id="fontSelector" onchange="updateFont()">
-            <option value="Arial">Arial</option>
-            <option value="Courier New">Courier New</option>
-            <option value="Georgia">Georgia</option>
-            <option value="Times New Roman">Times New Roman</option>
-            <option value="Verdana">Verdana</option>
-            <option value="Comic Sans MS">Comic Sans MS</option>
-            <option value="Impact">Impact</option>
-            <option value="Tahoma">Tahoma</option>
-            <option value="Trebuchet MS">Trebuchet MS</option>
-            <option value="Lucida Console">Lucida Console</option>
-        </select>
-        <input type="number" id="fontSize" placeholder="Font Size (px)" value="16" min="8" max="72" onchange="updateFont()">
-        <textarea id="noteContent" rows="10" placeholder="Write your note here..." style="font-size: 16px; font-family: Arial;"></textarea>
-        <button type="submit">Save Note</button>
+    <h1>Create a New Note</h1>
+    <form id="note-form">
+        <input type="text" name="title" placeholder="Note Title" required>
+        <textarea name="desc" placeholder="Note Description" required></textarea>
+        <input type="hidden" name="sessionId" value="">
+        <button type="submit">Add Note</button>
     </form>
-</div>
+    <script>
+        // Get session ID from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('sessionId');
+        document.querySelector('input[name="sessionId"]').value = sessionId;
 
-<script>
-    function updateFont() {
-        const fontSize = document.getElementById('fontSize').value + 'px';
-        const fontFamily = document.getElementById('fontSelector').value;
-        document.getElementById('noteContent').style.fontSize = fontSize;
-        document.getElementById('noteContent').style.fontFamily = fontFamily;
-    }
-
-    document.getElementById('noteForm').addEventListener('submit', function (event) {
-        event.preventDefault();
-        const noteContent = document.getElementById('noteContent').value;
-        const sessionId = new URLSearchParams(window.location.search).get('sessionId'); // Get sessionId from URL
-
-        // Sending note data to the server
-        fetch('/addnote', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ sessionId: sessionId, title: 'New Note', desc: noteContent }) // Add title if needed
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Note saved successfully!');
-                document.getElementById('noteContent').value = ''; // Clear the textarea
-            } else {
-                alert(data.message); // Show error message if saving failed
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while saving the note.');
+        document.getElementById('note-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch('/addnote', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json()).then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    // Optionally, redirect to dashboard or clear the form
+                } else {
+                    alert(data.message);
+                }
+            });
         });
-    });
-</script>
-
+    </script>
 </body>
 </html>
