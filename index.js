@@ -23,12 +23,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Function to check if a user is authenticated
-const isAuthenticated = (req) => {
-  const sessionId = req.body.sessionId || req.query.sessionId; // Get session ID from request body or query parameters
-  return sessions[sessionId] !== undefined; // Check if session exists
-};
-
 // Middleware
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
@@ -50,31 +44,13 @@ app.get('/login', (req, res) => {
 // Serve the dashboard (Protected route)
 app.get('/dashboard', (req, res) => {
   const sessionId = req.query.sessionId; // Check for session ID in the query parameters
+  console.log(`Checking session ID: ${sessionId}`); // Log session ID for debugging
   if (!sessions[sessionId]) {
     // If no session exists, redirect to login
     return res.redirect('/login');
   }
   // If session exists, serve the dashboard page
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Serve the profile page (Protected route)
-app.get('/profile', (req, res) => {
-  const sessionId = req.query.sessionId;
-  if (!sessions[sessionId]) {
-    return res.redirect('/login');
-  }
-  const user = sessions[sessionId];
-  res.json(user); // Send user data as JSON
-});
-
-// Serve the new note creation page (Protected route)
-app.get('/newnote', (req, res) => {
-  const sessionId = req.query.sessionId;
-  if (!sessions[sessionId]) {
-    return res.redirect('/login');
-  }
-  res.sendFile(path.join(__dirname, 'public', 'newnote.html'));
 });
 
 // API: Register a user
@@ -100,17 +76,22 @@ app.post('/login', (req, res) => {
   const sessionId = Date.now().toString();
   sessions[sessionId] = { email: user.email, username: user.username };
 
+  // Respond with sessionId to be used in the frontend
   return res.json({ success: true, message: 'Login successful', sessionId });
 });
 
-// API: Add a note (Authenticated route)
-app.post('/addnote', (req, res) => {
-  const sessionId = req.body.sessionId; // Get session ID from request body
+// Middleware to check authentication
+const checkAuth = (req, res, next) => {
+  const sessionId = req.body.sessionId || req.query.sessionId; // Check for session ID
   if (!sessions[sessionId]) {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
+  next(); // Continue to the next middleware if authenticated
+};
 
-  const { title, desc } = req.body;
+// API: Add a note (Authenticated route)
+app.post('/addnote', checkAuth, (req, res) => {
+  const { title, desc, sessionId } = req.body;
   const user = sessions[sessionId];
 
   if (!title || !desc) {
@@ -122,12 +103,8 @@ app.post('/addnote', (req, res) => {
 });
 
 // API: Get notes for a user (Authenticated route)
-app.post('/getnotes', (req, res) => {
-  const sessionId = req.body.sessionId; // Get session ID from request body
-  if (!sessions[sessionId]) {
-    return res.json({ success: false, message: 'Unauthorized. Please log in.' });
-  }
-
+app.post('/getnotes', checkAuth, (req, res) => {
+  const { sessionId } = req.body;
   const user = sessions[sessionId];
   const userNotes = notes.filter(note => note.email === user.email && !archivedNotes.includes(note.id));
 
@@ -135,13 +112,8 @@ app.post('/getnotes', (req, res) => {
 });
 
 // API: Delete a note (Authenticated route)
-app.post('/deletenote', (req, res) => {
-  const sessionId = req.body.sessionId; // Get session ID from request body
-  if (!sessions[sessionId]) {
-    return res.json({ success: false, message: 'Unauthorized. Please log in.' });
-  }
-
-  const { id } = req.body;
+app.post('/deletenote', checkAuth, (req, res) => {
+  const { id, sessionId } = req.body;
   const user = sessions[sessionId];
 
   notes = notes.filter(note => note.id !== parseInt(id) || note.email !== user.email);
@@ -149,13 +121,8 @@ app.post('/deletenote', (req, res) => {
 });
 
 // API: Archive a note (Authenticated route)
-app.post('/archivenote', (req, res) => {
-  const sessionId = req.body.sessionId; // Get session ID from request body
-  if (!sessions[sessionId]) {
-    return res.json({ success: false, message: 'Unauthorized. Please log in.' });
-  }
-
-  const { id } = req.body;
+app.post('/archivenote', checkAuth, (req, res) => {
+  const { id, sessionId } = req.body;
   const user = sessions[sessionId];
 
   if (!notes.find(note => note.id === parseInt(id) && note.email === user.email)) {
@@ -167,13 +134,8 @@ app.post('/archivenote', (req, res) => {
 });
 
 // API: Pin a note (Authenticated route)
-app.post('/pinnote', (req, res) => {
-  const sessionId = req.body.sessionId; // Get session ID from request body
-  if (!sessions[sessionId]) {
-    return res.json({ success: false, message: 'Unauthorized. Please log in.' });
-  }
-
-  const { id } = req.body;
+app.post('/pinnote', checkAuth, (req, res) => {
+  const { id, sessionId } = req.body;
   const user = sessions[sessionId];
 
   const note = notes.find(note => note.id === parseInt(id) && note.email === user.email);
@@ -186,13 +148,9 @@ app.post('/pinnote', (req, res) => {
 });
 
 // API: Update Profile (Authenticated route)
-app.post('/updateprofile', upload.single('profileImage'), (req, res) => {
+app.post('/updateprofile', upload.single('profileImage'), checkAuth, (req, res) => {
   const { name, email, description, contact, sessionId } = req.body;
   const user = sessions[sessionId];
-
-  if (!user) {
-    return res.json({ success: false, message: 'Unauthorized. Please log in.' });
-  }
 
   const updatedUser = users.find(u => u.email === user.email);
   if (updatedUser) {
