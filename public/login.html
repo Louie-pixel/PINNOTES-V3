@@ -4,39 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <style>
-        body {
-            background-image: url('chalkboard.jpg');
-            background-size: cover;
-            color: white;
-        }
-        .container {
-            margin-top: 100px;
-            background-color: rgba(0, 0, 0, 0.5);
-            padding: 20px;
-            border-radius: 10px;
-        }
-    </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Login</h2>
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" class="form-control" id="username" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" class="form-control" id="password" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Login</button>
-        </form>
-        <p>Don't have an account? <a href="/signup">Sign Up</a></p>
-    </div>
-
-    <!-- Include the login.js script -->
-    <script src="/login.js"></script>
+    <h1>Login</h1>
+    <form id="login-form">
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+    </form>
+    <p>Don't have an account? <a href="/signup">Sign up here</a></p>
+    <script>
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch('/login', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json()).then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.href = `/dashboard?sessionId=${data.sessionId}`; // Redirect with session ID
+                } else {
+                    alert(data.message);
+                }
+            });
+        });
+    </script>
 </body>
 </html>
