@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 let users = [];
 let notes = [];
 let archivedNotes = [];
-let sessions = {}; // Store active sessions by username
+let sessions = {}; // Store active sessions by session ID
 
 // Set up multer for image upload
 const storage = multer.diskStorage({
@@ -91,6 +91,7 @@ app.post('/register', (req, res) => {
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
   const user = users.find(user => user.username === username && user.password === password);
+  
   if (!user) {
     return res.json({ success: false, message: 'Invalid credentials' });
   }
@@ -104,11 +105,12 @@ app.post('/login', (req, res) => {
 
 // API: Add a note (Authenticated route)
 app.post('/addnote', (req, res) => {
-  if (!isAuthenticated(req)) {
+  const sessionId = req.body.sessionId; // Get session ID from request body
+  if (!sessions[sessionId]) {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
 
-  const { title, desc, sessionId } = req.body;
+  const { title, desc } = req.body;
   const user = sessions[sessionId];
 
   if (!title || !desc) {
@@ -121,11 +123,11 @@ app.post('/addnote', (req, res) => {
 
 // API: Get notes for a user (Authenticated route)
 app.post('/getnotes', (req, res) => {
-  if (!isAuthenticated(req)) {
+  const sessionId = req.body.sessionId; // Get session ID from request body
+  if (!sessions[sessionId]) {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
 
-  const { sessionId } = req.body;
   const user = sessions[sessionId];
   const userNotes = notes.filter(note => note.email === user.email && !archivedNotes.includes(note.id));
 
@@ -134,11 +136,12 @@ app.post('/getnotes', (req, res) => {
 
 // API: Delete a note (Authenticated route)
 app.post('/deletenote', (req, res) => {
-  if (!isAuthenticated(req)) {
+  const sessionId = req.body.sessionId; // Get session ID from request body
+  if (!sessions[sessionId]) {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
 
-  const { id, sessionId } = req.body;
+  const { id } = req.body;
   const user = sessions[sessionId];
 
   notes = notes.filter(note => note.id !== parseInt(id) || note.email !== user.email);
@@ -147,11 +150,12 @@ app.post('/deletenote', (req, res) => {
 
 // API: Archive a note (Authenticated route)
 app.post('/archivenote', (req, res) => {
-  if (!isAuthenticated(req)) {
+  const sessionId = req.body.sessionId; // Get session ID from request body
+  if (!sessions[sessionId]) {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
 
-  const { id, sessionId } = req.body;
+  const { id } = req.body;
   const user = sessions[sessionId];
 
   if (!notes.find(note => note.id === parseInt(id) && note.email === user.email)) {
@@ -164,11 +168,12 @@ app.post('/archivenote', (req, res) => {
 
 // API: Pin a note (Authenticated route)
 app.post('/pinnote', (req, res) => {
-  if (!isAuthenticated(req)) {
+  const sessionId = req.body.sessionId; // Get session ID from request body
+  if (!sessions[sessionId]) {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
 
-  const { id, sessionId } = req.body;
+  const { id } = req.body;
   const user = sessions[sessionId];
 
   const note = notes.find(note => note.id === parseInt(id) && note.email === user.email);
