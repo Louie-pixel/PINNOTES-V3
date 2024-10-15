@@ -30,7 +30,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Helper function to check if a user is authenticated
 const isAuthenticated = (req) => {
-  const { sessionId } = req.body;
+  const sessionId = req.query.sessionId || req.body.sessionId; // Check sessionId in query or body
   return sessions[sessionId];
 };
 
@@ -47,17 +47,32 @@ app.get('/signup', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'signup.html'));
 });
 
+// Serve the dashboard (Protected route)
 app.get('/dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html')); // dashboard.html should be index.html
+  const sessionId = req.query.sessionId; // Check for session ID in the query parameters
+  if (!sessions[sessionId]) {
+    // If no session exists, redirect to login
+    return res.redirect('/login');
+  }
+  // If session exists, serve the dashboard page
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Serve the profile page
+// Serve the profile page (Protected route)
 app.get('/profile', (req, res) => {
+  const sessionId = req.query.sessionId;
+  if (!sessions[sessionId]) {
+    return res.redirect('/login');
+  }
   res.sendFile(path.join(__dirname, 'public', 'profile.html'));
 });
 
-// Serve the new note creation page
+// Serve the new note creation page (Protected route)
 app.get('/newnote', (req, res) => {
+  const sessionId = req.query.sessionId;
+  if (!sessions[sessionId]) {
+    return res.redirect('/login');
+  }
   res.sendFile(path.join(__dirname, 'public', 'newnote.html'));
 });
 
