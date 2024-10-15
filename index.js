@@ -64,7 +64,8 @@ app.get('/profile', (req, res) => {
   if (!sessions[sessionId]) {
     return res.redirect('/login');
   }
-  res.sendFile(path.join(__dirname, 'public', 'profile.html'));
+  const user = sessions[sessionId];
+  res.json(user); // Send user data as JSON
 });
 
 // Serve the new note creation page (Protected route)
