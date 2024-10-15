@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Pinnotes</title>
+    <title>User Dashboard</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    <link rel="stylesheet" href="styles.css">
     <style>
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f5f5f5;
+            background-image: url('chalkboard.jpg');
+            background-size: cover;
         }
         .sidebar {
             height: 100%;
@@ -19,329 +18,126 @@
             z-index: 1;
             top: 0;
             left: 0;
-            background-color: #111;
+            background-color: rgba(255, 255, 255, 0.8);
             padding-top: 20px;
         }
         .sidebar a {
             padding: 10px 15px;
             text-decoration: none;
             font-size: 18px;
-            color: white;
+            color: black;
             display: block;
         }
         .sidebar a:hover {
-            background-color: #575757;
+            background-color: #ddd;
+            color: black;
         }
         .content {
             margin-left: 260px;
             padding: 20px;
         }
-        .profile-container {
-            max-width: 600px;
-            margin: 50px auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        .profile-header {
-            text-align: center;
-        }
-        .profile-header img {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            margin-bottom: 20px;
-        }
-        .profile-form input, .profile-form textarea {
-            width: 100%;
-            margin-bottom: 15px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .profile-form button {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .profile-form button:hover {
-            background-color: #0056b3;
-        }
         .note-card {
-            border: 1px solid #ccc;
+            background-color: #fff;
+            border: 1px solid #ddd;
             padding: 15px;
             margin: 10px 0;
-            background-color: #fff;
-            position: relative;
-        }
-        .note-card h4 {
-            margin: 0;
-            font-size: 18px;
-        }
-        .note-card p {
-            margin: 5px 0;
-            font-size: 14px;
-        }
-        .action-dropdown {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-        }
-        .font-select {
-            margin-bottom: 15px;
-        }
-        .font-select select {
-            padding: 5px;
             border-radius: 5px;
         }
     </style>
 </head>
 <body>
     <div class="sidebar">
-        <a href="#" class="dropdown-btn">Notes Options</a>
-        <div class="dropdown-container">
-            <a href="#" id="pinNotesBtn">Pin Notes</a>
-            <a href="#" id="archiveNotesBtn">Archive Notes</a>
-            <a href="#" id="createNewNoteBtn">Create New Note</a>
-        </div>
-        <a href="#" id="profileBtn" class="profile-btn">Profile</a>
+        <h2>My Dashboard</h2>
+        <a href="#" id="dashboardButton">Dashboard</a>
+        <a href="#" id="profileButton">Profile</a>
+        <a href="#" id="createNoteButton">Create Note</a>
+        <a href="/logout">Logout</a>
     </div>
 
-    <div class="content" id="dashboardContent">
-        <h2>Welcome to Your Dashboard</h2>
-        <p>Manage your notes with ease.</p>
-        <div id="notesList">
-            <!-- Notes will be loaded here -->
+    <div class="content">
+        <div id="dashboardContent">
+            <h2>Your Notes</h2>
+            <div id="notesList"></div>
+            <button class="btn btn-primary" id="refreshNotesButton">Refresh Notes</button>
         </div>
-    </div>
 
-    <div class="content" id="profileContent" style="display:none;">
-        <div class="profile-container">
-            <div class="profile-header">
-                <h2>Your Profile</h2>
-                <img id="profileImage" src="/default-profile.png" alt="Profile Image">
-            </div>
-            <form class="profile-form" id="profileForm" enctype="multipart/form-data">
-                <input type="text" name="name" id="name" placeholder="Your Name" required>
-                <input type="email" name="email" id="email" placeholder="Your Email" required>
-                <input type="text" name="contact" id="contact" placeholder="Your Contact Details">
-                <textarea name="description" id="description" rows="4" placeholder="Describe yourself"></textarea>
-                <input type="file" name="profileImage" id="profileImageUpload" accept="image/*">
-                <button type="submit">Update Profile</button>
+        <div id="profileContent" style="display: none;">
+            <h2>Profile</h2>
+            <form id="profileForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" class="form-control" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" class="form-control" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea class="form-control" id="description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="contact">Contact:</label>
+                    <input type="text" class="form-control" id="contact" required>
+                </div>
+                <div class="form-group">
+                    <label for="profileImage">Profile Image:</label>
+                    <input type="file" class="form-control" id="profileImage">
+                </div>
+                <button type="submit" class="btn btn-success">Update Profile</button>
             </form>
+            <img id="currentProfileImage" src="public/uploads/default-profile.png" alt="Profile Image" style="width: 100px; margin-top: 20px;">
         </div>
-    </div>
 
-    <div class="content" id="createNoteContent" style="display:none;">
-        <h2>Create New Note</h2>
-        <div class="font-select">
-            <label for="fontSelector">Choose a font:</label>
-            <select id="fontSelector">
-                <option value="'Roboto', sans-serif">Roboto</option>
-                <option value="'Arial', sans-serif">Arial</option>
-                <option value="'Courier New', monospace">Courier New</option>
-                <option value="'Georgia', serif">Georgia</option>
-                <option value="'Times New Roman', serif">Times New Roman</option>
-                <option value="'Verdana', sans-serif">Verdana</option>
-                <option value="'Tahoma', sans-serif">Tahoma</option>
-            </select>
-        </div>
-        <textarea id="noteContent" rows="10" placeholder="Write your note here..." style="width: 100%; padding: 10px;"></textarea>
-        <button id="saveNoteBtn">Save Note</button>
-    </div>
-
-    <!-- Archive password modal -->
-    <div id="archiveModal" class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Enter Password to View Archived Notes</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <input type="password" id="archivePassword" class="form-control" placeholder="Password">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="submitArchivePassword">Submit</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
+        <div id="createNoteContent" style="display: none;">
+            <h2>Create Note</h2>
+            <div class="form-group">
+                <label for="noteTitle">Title:</label>
+                <input type="text" class="form-control" id="noteTitle" required>
             </div>
+            <div class="form-group">
+                <label for="noteContent">Content:</label>
+                <textarea class="form-control" id="noteContent" required></textarea>
+            </div>
+            <button class="btn btn-primary" id="saveNoteBtn">Save Note</button>
         </div>
     </div>
 
     <script>
-        // Toggle sidebar dropdown
-        document.querySelector('.dropdown-btn').addEventListener('click', function () {
-            var dropdownContent = this.nextElementSibling;
-            dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
-        });
+        const sessionId = localStorage.getItem('sessionId');
 
-        // Profile button click handler
-        document.getElementById('profileBtn').addEventListener('click', function () {
-            document.getElementById('dashboardContent').style.display = 'none';
+        document.getElementById('dashboardButton').addEventListener('click', () => {
+            document.getElementById('dashboardContent').style.display = 'block';
+            document.getElementById('profileContent').style.display = 'none';
             document.getElementById('createNoteContent').style.display = 'none';
-            document.getElementById('profileContent').style.display = 'block';
+            fetchNotes();
         });
 
-        // Create new note button
-        document.getElementById('createNewNoteBtn').addEventListener('click', function() {
+        document.getElementById('profileButton').addEventListener('click', () => {
+            document.getElementById('dashboardContent').style.display = 'none';
+            document.getElementById('profileContent').style.display = 'block';
+            document.getElementById('createNoteContent').style.display = 'none';
+            loadProfile();
+        });
+
+        document.getElementById('createNoteButton').addEventListener('click', () => {
             document.getElementById('dashboardContent').style.display = 'none';
             document.getElementById('profileContent').style.display = 'none';
             document.getElementById('createNoteContent').style.display = 'block';
         });
 
-        // Archive notes button
-        document.getElementById('archiveNotesBtn').addEventListener('click', function() {
-            $('#archiveModal').modal('show');  // Show password modal
-        });
-
-        // Handle archive password submission
-        document.getElementById('submitArchivePassword').addEventListener('click', function() {
-            const password = document.getElementById('archivePassword').value;
-            const sessionId = localStorage.getItem('sessionId');
-            if (password) {
-                fetch('/archivenotes', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sessionId, password })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Archived notes: ' + JSON.stringify(data.archivedNotes));
-                        $('#archiveModal').modal('hide');
-                    } else {
-                        alert(data.message);
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-            } else {
-                alert('Please enter your password');
+        document.getElementById('profileForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('name', document.getElementById('name').value);
+            formData.append('email', document.getElementById('email').value);
+            formData.append('description', document.getElementById('description').value);
+            formData.append('contact', document.getElementById('contact').value);
+            const profileImage = document.getElementById('profileImage').files[0];
+            if (profileImage) {
+                formData.append('profileImage', profileImage);
             }
-        });
-
-        // Fetch notes function
-        function fetchNotes() {
-            const sessionId = localStorage.getItem('sessionId');
-            fetch('/getnotes', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                const notesList = document.getElementById('notesList');
-                notesList.innerHTML = ''; // Clear existing notes
-                if (data.success) {
-                    data.notes.forEach(note => {
-                        const noteCard = document.createElement('div');
-                        noteCard.className = 'note-card';
-                        noteCard.style.fontFamily = note.font || 'Roboto, sans-serif'; // Set font
-                        noteCard.innerHTML = `
-                            <h4>${note.title}</h4>
-                            <p>${note.content}</p>
-                            <div class="action-dropdown">
-                                <button class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">Actions</button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#" onclick="editNote(${note.id})">Edit</a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="archiveNote(${note.id})">Archive</a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="deleteNote(${note.id})">Delete</a></li>
-                                </ul>
-                            </div>
-                        `;
-                        notesList.appendChild(noteCard);
-                    });
-                } else {
-                    alert(data.message);
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        }
-
-        // Save new note function
-        document.getElementById('saveNoteBtn').addEventListener('click', function() {
-            const noteContent = document.getElementById('noteContent').value;
-            const font = document.getElementById('fontSelector').value;
-            const sessionId = localStorage.getItem('sessionId');
-            if (noteContent) {
-                fetch('/savenote', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sessionId, content: noteContent, font: font })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Note saved successfully!');
-                        document.getElementById('noteContent').value = ''; // Clear textarea
-                        fetchNotes();  // Refresh the notes list
-                        document.getElementById('createNoteContent').style.display = 'none';
-                        document.getElementById('dashboardContent').style.display = 'block';
-                    } else {
-                        alert(data.message);
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-            } else {
-                alert('Please enter your note content');
-            }
-        });
-
-        // Edit note function (to be implemented)
-        function editNote(noteId) {
-            alert('Edit note functionality not implemented yet.');
-        }
-
-        // Archive note function
-        function archiveNote(noteId) {
-            const sessionId = localStorage.getItem('sessionId');
-            fetch('/archivenote', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId, noteId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Note archived successfully!');
-                    fetchNotes();  // Refresh the notes list
-                } else {
-                    alert(data.message);
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        }
-
-        // Delete note function
-        function deleteNote(noteId) {
-            const sessionId = localStorage.getItem('sessionId');
-            fetch('/deletenote', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId, id: noteId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Note deleted successfully!');
-                    fetchNotes();  // Refresh the notes list
-                } else {
-                    alert(data.message);
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        }
-
-        // Profile form submission
-        document.getElementById('profileForm').addEventListener('submit', function (event) {
-            event.preventDefault();
-            const formData = new FormData(this);
+            formData.append('sessionId', sessionId);
             fetch('/updateprofile', {
                 method: 'POST',
                 body: formData
@@ -350,7 +146,7 @@
             .then(data => {
                 if (data.success) {
                     alert('Profile updated successfully!');
-                    document.getElementById('profileImage').src = `/uploads/${data.profileImage}`;
+                    document.getElementById('currentProfileImage').src = `public/uploads/${data.profileImage}`;
                 } else {
                     alert(data.message);
                 }
@@ -358,10 +154,93 @@
             .catch(error => console.error('Error:', error));
         });
 
-        // Fetch notes on page load
-        window.onload = fetchNotes;
+        function fetchNotes() {
+            fetch('/getnotes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const notesList = document.getElementById('notesList');
+                notesList.innerHTML = '';  // Clear existing notes
+                data.notes.forEach(note => {
+                    const noteCard = document.createElement('div');
+                    noteCard.className = 'note-card';
+                    noteCard.innerHTML = `<h4>${note.title}</h4><p>${note.desc}</p>
+                    <button class="btn btn-danger deleteNote" data-id="${note.id}">Delete</button>`;
+                    notesList.appendChild(noteCard);
+                });
+                attachDeleteNoteEvent();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function attachDeleteNoteEvent() {
+            const deleteButtons = document.querySelectorAll('.deleteNote');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const noteId = button.getAttribute('data-id');
+                    fetch('/deletenote', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: noteId, sessionId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Note deleted successfully!');
+                            fetchNotes();  // Refresh notes
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
+            });
+        }
+
+        document.getElementById('saveNoteBtn').addEventListener('click', () => {
+            const noteTitle = document.getElementById('noteTitle').value;
+            const noteContent = document.getElementById('noteContent').value;
+
+            fetch('/addnote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: noteTitle, desc: noteContent, sessionId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Note saved successfully');
+                    fetchNotes();  // Refresh notes
+                    document.getElementById('noteTitle').value = '';  // Clear title
+                    document.getElementById('noteContent').value = '';  // Clear content
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        function loadProfile() {
+            fetch('/profile', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('name').value = data.name || '';
+                document.getElementById('email').value = data.email || '';
+                document.getElementById('description').value = data.description || '';
+                document.getElementById('contact').value = data.contact || '';
+                document.getElementById('currentProfileImage').src = `public/uploads/${data.profileImage || 'default-profile.png'}`;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Initial fetch of notes on dashboard load
+        document.addEventListener('DOMContentLoaded', fetchNotes);
     </script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </body>
 </html>
