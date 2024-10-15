@@ -209,18 +209,18 @@
             const noteTitle = document.getElementById('noteTitle').value;
             const noteContent = document.getElementById('noteContent').value;
 
-            fetch('/addnote', {
+            fetch('/createnote', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title: noteTitle, desc: noteContent, sessionId })
+                body: JSON.stringify({ title: noteTitle, content: noteContent, sessionId })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Note saved successfully');
-                    fetchNotes();  // Refresh notes
-                    document.getElementById('noteTitle').value = '';  // Clear title
-                    document.getElementById('noteContent').value = '';  // Clear content
+                    alert('Note created successfully!');
+                    fetchNotes(); // Refresh notes
+                    document.getElementById('noteTitle').value = '';
+                    document.getElementById('noteContent').value = '';
                 } else {
                     alert(data.message);
                 }
@@ -236,22 +236,18 @@
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    document.getElementById('name').value = data.profile.name;
-                    document.getElementById('email').value = data.profile.email;
-                    document.getElementById('description').value = data.profile.description;
-                    document.getElementById('contact').value = data.profile.contact;
-                    document.getElementById('currentProfileImage').src = `public/uploads/${data.profile.image}`;
-                } else {
-                    alert(data.message);
-                }
+                document.getElementById('name').value = data.name;
+                document.getElementById('email').value = data.email;
+                document.getElementById('description').value = data.description;
+                document.getElementById('contact').value = data.contact;
+                document.getElementById('currentProfileImage').src = `public/uploads/${data.profileImage}`;
             })
             .catch(error => console.error('Error:', error));
         }
 
         document.getElementById('refreshNotesButton').addEventListener('click', fetchNotes);
 
-        // Load notes when the dashboard is first displayed
+        // Automatically load notes on page load
         fetchNotes();
     </script>
 </body>
