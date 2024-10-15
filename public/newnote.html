@@ -28,7 +28,7 @@
             }).then(response => response.json()).then(data => {
                 if (data.success) {
                     alert(data.message);
-                    // Optionally, redirect to the dashboard after adding the note
+                    // Redirect to the dashboard after adding the note
                     window.location.href = `/dashboard?sessionId=${sessionId}`; // Keep the session
                 } else {
                     alert(data.message);
