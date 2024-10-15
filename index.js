@@ -99,16 +99,18 @@ app.post('/login', (req, res) => {
   const sessionId = Date.now().toString();
   sessions[sessionId] = { email: user.email, username: user.username };
 
+  // Return the session ID to the client
   return res.json({ success: true, message: 'Login successful', sessionId });
 });
 
 // API: Add a note (Authenticated route)
 app.post('/addnote', (req, res) => {
+  const sessionId = req.body.sessionId; // Get sessionId from the body
   if (!isAuthenticated(req)) {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
 
-  const { title, desc, sessionId } = req.body;
+  const { title, desc } = req.body;
   const user = sessions[sessionId];
 
   if (!title || !desc) {
@@ -121,11 +123,11 @@ app.post('/addnote', (req, res) => {
 
 // API: Get notes for a user (Authenticated route)
 app.post('/getnotes', (req, res) => {
+  const sessionId = req.body.sessionId; // Get sessionId from the body
   if (!isAuthenticated(req)) {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
 
-  const { sessionId } = req.body;
   const user = sessions[sessionId];
   const userNotes = notes.filter(note => note.email === user.email && !archivedNotes.includes(note.id));
 
@@ -134,44 +136,44 @@ app.post('/getnotes', (req, res) => {
 
 // API: Delete a note (Authenticated route)
 app.post('/deletenote', (req, res) => {
+  const sessionId = req.body.sessionId; // Get sessionId from the body
   if (!isAuthenticated(req)) {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
 
-  const { id, sessionId } = req.body;
   const user = sessions[sessionId];
 
-  notes = notes.filter(note => note.id !== parseInt(id) || note.email !== user.email);
+  notes = notes.filter(note => note.id !== parseInt(req.body.id) || note.email !== user.email);
   return res.json({ success: true, message: 'Note deleted' });
 });
 
 // API: Archive a note (Authenticated route)
 app.post('/archivenote', (req, res) => {
+  const sessionId = req.body.sessionId; // Get sessionId from the body
   if (!isAuthenticated(req)) {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
 
-  const { id, sessionId } = req.body;
   const user = sessions[sessionId];
 
-  if (!notes.find(note => note.id === parseInt(id) && note.email === user.email)) {
+  if (!notes.find(note => note.id === parseInt(req.body.id) && note.email === user.email)) {
     return res.json({ success: false, message: 'Note not found' });
   }
 
-  archivedNotes.push(parseInt(id));
+  archivedNotes.push(parseInt(req.body.id));
   return res.json({ success: true, message: 'Note archived' });
 });
 
 // API: Pin a note (Authenticated route)
 app.post('/pinnote', (req, res) => {
+  const sessionId = req.body.sessionId; // Get sessionId from the body
   if (!isAuthenticated(req)) {
     return res.json({ success: false, message: 'Unauthorized. Please log in.' });
   }
 
-  const { id, sessionId } = req.body;
   const user = sessions[sessionId];
 
-  const note = notes.find(note => note.id === parseInt(id) && note.email === user.email);
+  const note = notes.find(note => note.id === parseInt(req.body.id) && note.email === user.email);
   if (note) {
     note.pinned = !note.pinned;
     return res.json({ success: true, message: 'Note pinned/unpinned' });
