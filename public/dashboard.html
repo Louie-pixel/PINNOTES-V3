@@ -50,7 +50,7 @@
         <h2>My Dashboard</h2>
         <a href="#" id="dashboardButton">Dashboard</a>
         <a href="#" id="profileButton">Profile</a>
-        <a href="#" id="createNoteButton">Create Note</a>
+        <a href="/newnote?sessionId=<sessionId>" id="createNoteLink">Create Note</a>
         <a href="/logout">Logout</a>
     </div>
 
@@ -74,11 +74,11 @@
                 </div>
                 <div class="form-group">
                     <label for="description">Description:</label>
-                    <textarea class="form-control" id="description" required></textarea>
+                    <textarea class="form-control" id="description"></textarea>
                 </div>
                 <div class="form-group">
                     <label for="contact">Contact:</label>
-                    <input type="text" class="form-control" id="contact" required>
+                    <input type="text" class="form-control" id="contact">
                 </div>
                 <div class="form-group">
                     <label for="profileImage">Profile Image:</label>
@@ -86,52 +86,45 @@
                 </div>
                 <button type="submit" class="btn btn-success">Update Profile</button>
             </form>
-            <img id="currentProfileImage" src="public/uploads/default-profile.png" alt="Profile Image" style="width: 100px; margin-top: 20px;">
-        </div>
-
-        <div id="createNoteContent" style="display: none;">
-            <h2>Create Note</h2>
-            <div class="form-group">
-                <label for="noteTitle">Title:</label>
-                <input type="text" class="form-control" id="noteTitle" required>
-            </div>
-            <div class="form-group">
-                <label for="noteContent">Content:</label>
-                <textarea class="form-control" id="noteContent" required></textarea>
-            </div>
-            <button class="btn btn-primary" id="saveNoteBtn">Save Note</button>
         </div>
     </div>
 
     <script>
-        const sessionId = localStorage.getItem('sessionId');
-
-        // Check if sessionId exists, otherwise redirect to login
-        if (!sessionId) {
-            window.location.href = '/login'; // Redirect to login if no session ID
-        }
-
-        document.getElementById('dashboardButton').addEventListener('click', () => {
-            document.getElementById('dashboardContent').style.display = 'block';
-            document.getElementById('profileContent').style.display = 'none';
-            document.getElementById('createNoteContent').style.display = 'none';
-            fetchNotes();
-        });
+        const sessionId = new URLSearchParams(window.location.search).get('sessionId');
 
         document.getElementById('profileButton').addEventListener('click', () => {
             document.getElementById('dashboardContent').style.display = 'none';
             document.getElementById('profileContent').style.display = 'block';
-            document.getElementById('createNoteContent').style.display = 'none';
-            loadProfile();
         });
 
-        document.getElementById('createNoteButton').addEventListener('click', () => {
-            document.getElementById('dashboardContent').style.display = 'none';
-            document.getElementById('profileContent').style.display = 'none';
-            document.getElementById('createNoteContent').style.display = 'block';
-        });
+        document.getElementById('refreshNotesButton').addEventListener('click', fetchNotes);
 
-        document.getElementById('profileForm').addEventListener('submit', (e) => {
+        function fetchNotes() {
+            fetch('/getnotes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ sessionId }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const notesList = document.getElementById('notesList');
+                notesList.innerHTML = '';
+                if (data.success) {
+                    data.notes.forEach(note => {
+                        const noteCard = document.createElement('div');
+                        noteCard.className = 'note-card';
+                        noteCard.innerHTML = `<h4>${note.title}</h4><p>${note.desc}</p>`;
+                        notesList.appendChild(noteCard);
+                    });
+                } else {
+                    notesList.innerHTML = `<p>${data.message}</p>`;
+                }
+            });
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', function (e) {
             e.preventDefault();
             const formData = new FormData();
             formData.append('name', document.getElementById('name').value);
@@ -142,112 +135,21 @@
             if (profileImage) {
                 formData.append('profileImage', profileImage);
             }
-            formData.append('sessionId', sessionId);
+
             fetch('/updateprofile', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: {
+                    'sessionId': sessionId // Send session ID as a header
+                },
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    alert('Profile updated successfully!');
-                    document.getElementById('currentProfileImage').src = `public/uploads/${data.profileImage}`;
-                } else {
-                    alert(data.message);
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        });
-
-        function fetchNotes() {
-            fetch('/getnotes', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                const notesList = document.getElementById('notesList');
-                notesList.innerHTML = '';  // Clear existing notes
-                data.notes.forEach(note => {
-                    const noteCard = document.createElement('div');
-                    noteCard.className = 'note-card';
-                    noteCard.innerHTML = `<h4>${note.title}</h4><p>${note.desc}</p>
-                    <button class="btn btn-danger deleteNote" data-id="${note.id}">Delete</button>`;
-                    notesList.appendChild(noteCard);
-                });
-                attachDeleteNoteEvent();
-            })
-            .catch(error => console.error('Error:', error));
-        }
-
-        function attachDeleteNoteEvent() {
-            const deleteButtons = document.querySelectorAll('.deleteNote');
-            deleteButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const noteId = button.getAttribute('data-id');
-                    fetch('/deletenote', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ id: noteId, sessionId })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Note deleted successfully!');
-                            fetchNotes();  // Refresh notes
-                        } else {
-                            alert(data.message);
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
-                });
+                alert(data.message);
             });
-        }
-
-        document.getElementById('saveNoteBtn').addEventListener('click', () => {
-            const noteTitle = document.getElementById('noteTitle').value;
-            const noteContent = document.getElementById('noteContent').value;
-
-            fetch('/createnote', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title: noteTitle, content: noteContent, sessionId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Note created successfully!');
-                    fetchNotes(); // Refresh notes
-                    document.getElementById('noteTitle').value = '';
-                    document.getElementById('noteContent').value = '';
-                } else {
-                    alert(data.message);
-                }
-            })
-            .catch(error => console.error('Error:', error));
         });
 
-        function loadProfile() {
-            fetch('/getprofile', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('name').value = data.name;
-                document.getElementById('email').value = data.email;
-                document.getElementById('description').value = data.description;
-                document.getElementById('contact').value = data.contact;
-                document.getElementById('currentProfileImage').src = `public/uploads/${data.profileImage}`;
-            })
-            .catch(error => console.error('Error:', error));
-        }
-
-        document.getElementById('refreshNotesButton').addEventListener('click', fetchNotes);
-
-        // Automatically load notes on page load
+        // Automatically fetch notes when the dashboard is loaded
         fetchNotes();
     </script>
 </body>
