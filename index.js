@@ -23,6 +23,12 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+// Function to check if a user is authenticated
+const isAuthenticated = (req) => {
+  const sessionId = req.body.sessionId || req.query.sessionId; // Get session ID from request body or query parameters
+  return sessions[sessionId] !== undefined; // Check if session exists
+};
+
 // Middleware
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
