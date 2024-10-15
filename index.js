@@ -1,13 +1,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
-const fs = require('fs');
 const multer = require('multer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// In-memory store for users, notes, sessions, and archived notes
+// In-memory storage for users, notes, sessions, and archived notes
 let users = [];
 let notes = [];
 let archivedNotes = [];
