@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const path = require('path'); // Import path for serving static files
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,7 +11,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from the public directory
 
-// In-memory store for notes (use a database in production)
+// In-memory store for notes and sessions (use a database in production)
 let notes = [];
 let sessionIds = {};
 
@@ -22,17 +22,18 @@ function generateSessionId() {
 
 // Endpoint to create a new session (login)
 app.post('/login', (req, res) => {
-    const { username } = req.body; // Extract username from request body
     const sessionId = generateSessionId();
-    sessionIds[sessionId] = username; // Store the username with session ID
+    sessionIds[sessionId] = req.body.username; // Store the username with session ID
     res.json({ success: true, sessionId });
 });
 
-// Endpoint to create a new user (signup)
+// Endpoint to create a new session (signup)
 app.post('/signup', (req, res) => {
-    const { username } = req.body; // Extract username from request body
-    // Here you can add logic to store the user in your database
-    res.json({ success: true, message: 'User created successfully' });
+    // You can implement signup logic here (e.g., storing user credentials)
+    // For simplicity, we assume any request to signup is successful.
+    const sessionId = generateSessionId();
+    sessionIds[sessionId] = req.body.username; // Store the username with session ID
+    res.json({ success: true, sessionId });
 });
 
 // Endpoint to add a new note
@@ -118,9 +119,9 @@ app.post('/deletenote', (req, res) => {
     res.json({ success: true, message: 'Note deleted.' });
 });
 
-// Redirect root URL to login page
+// Endpoint for the root URL
 app.get('/', (req, res) => {
-    res.redirect('/login.html'); // Redirect to login.html
+    res.send('<h1>Welcome to Pinnotes API</h1><p>Please use the API endpoints for operations.</p>');
 });
 
 // Start the server
