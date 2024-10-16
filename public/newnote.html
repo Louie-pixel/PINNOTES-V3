@@ -6,10 +6,9 @@
     <title>Create New Note</title>
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <style>
-        /* Style for the page */
         body {
             font-family: Arial, sans-serif;
-            background-color: white; /* White background for note writing */
+            background-color: white;
             color: #333;
             padding: 20px;
         }
@@ -20,7 +19,7 @@
             margin-top: 10px;
         }
         .title-input {
-            width: 100%; /* Full width for the title input */
+            width: 100%;
             padding: 10px;
             margin-bottom: 20px;
             border: 1px solid #ccc;
@@ -38,41 +37,38 @@
 
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script>
-        // Initialize Quill editor
         const quill = new Quill('#editor', {
             theme: 'snow',
             modules: {
                 toolbar: [
-                    ['bold', 'italic', 'underline', 'strike'], // toggled buttons
+                    ['bold', 'italic', 'underline', 'strike'],
                     ['blockquote', 'code-block'],
                     [{ 'list': 'ordered' }, { 'list': 'bullet' }],
                     ['link', 'image'],
-                    [{ 'color': [] }, { 'background': [] }], // dropdown with defaults
+                    [{ 'color': [] }, { 'background': [] }],
                     [{ 'font': [] }],
-                    [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
-                    ['clean']                                         // remove formatting button
+                    [{ 'size': ['small', false, 'large', 'huge'] }],
+                    ['clean']
                 ]
             }
         });
 
-        // Check if there is a note to edit
+        // Pre-fill the form if editing an existing note
         const editNoteId = localStorage.getItem('editNoteId');
         if (editNoteId) {
             document.getElementById('noteTitle').value = localStorage.getItem('editNoteTitle');
-            const desc = localStorage.getItem('editNoteDesc');
-            quill.root.innerHTML = desc; // Load existing note content
+            quill.root.innerHTML = localStorage.getItem('editNoteDesc');
         }
 
         document.getElementById('saveNote').addEventListener('click', () => {
-            const title = document.getElementById('noteTitle').value; // Get the note title
-            const desc = quill.root.innerHTML; // Get the HTML content
+            const title = document.getElementById('noteTitle').value;
+            const desc = quill.root.innerHTML;
 
             if (!title) {
-                alert("Please enter a note title."); // Alert if title is empty
+                alert("Please enter a note title.");
                 return;
             }
 
-            // Save or update the note
             const url = editNoteId ? '/updatenote' : '/addnote';
             const body = editNoteId 
                 ? { id: editNoteId, title, desc, sessionId: localStorage.getItem('sessionId') }
@@ -89,10 +85,10 @@
             .then(data => {
                 if (data.success) {
                     alert('Note saved successfully!');
-                    localStorage.removeItem('editNoteId'); // Clear the edit note ID
-                    localStorage.removeItem('editNoteTitle'); // Clear the title
-                    localStorage.removeItem('editNoteDesc'); // Clear the description
-                    window.location.href = '/dashboard'; // Redirect to the dashboard after saving
+                    localStorage.removeItem('editNoteId');
+                    localStorage.removeItem('editNoteTitle');
+                    localStorage.removeItem('editNoteDesc');
+                    window.location.href = '/dashboard'; // Redirect to dashboard
                 } else {
                     alert('Failed to save note: ' + data.message);
                 }
