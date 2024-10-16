@@ -203,5 +203,5 @@ app.post('/profile', (req, res) => {
 
 // Start the server
 app.listen(PORT, () => {
-    console.log(`Server running on http://192.168.0.106:${PORT}`);
+    console.log(`Server running on http://41.90.68.182:${PORT}`);
 });
