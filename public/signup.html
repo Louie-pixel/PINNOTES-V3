@@ -7,23 +7,14 @@
     <title>Sign Up</title>
 </head>
 <body>
-    <div class="container">
+    <div class="form-container">
         <h2>Sign Up</h2>
-        <form id="signupForm">
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" required>
-            </div>
-            <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" required>
-            </div>
-            <button type="submit" class="btn">Register</button>
-            <p>Already have an account? <a href="/login">Login</a></p>
+        <form id="signup-form">
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Sign Up</button>
+            <p>Already have an account? <a href="login.html">Log in</a></p>
         </form>
     </div>
     <script src="script.js"></script>
