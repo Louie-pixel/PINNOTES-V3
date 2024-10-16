@@ -6,6 +6,7 @@
     <title>Create New Note</title>
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <style>
+        /* Style for the page */
         body {
             font-family: Arial, sans-serif;
             background-color: white;
@@ -33,10 +34,11 @@
     <input type="text" id="noteTitle" class="title-input" placeholder="Enter note title" required>
     <div id="editor"></div>
     <button class="btn" id="saveNote">Save Note</button>
-    <button class="btn" onclick="window.location.href='/dashboard'">Back to Dashboard</button>
+    <button class="btn" onclick="window.location.href='/dashboard.html'">Back to Dashboard</button>
 
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script>
+        // Initialize Quill editor
         const quill = new Quill('#editor', {
             theme: 'snow',
             modules: {
@@ -53,44 +55,25 @@
             }
         });
 
-        // Pre-fill the form if editing an existing note
-        const editNoteId = localStorage.getItem('editNoteId');
-        if (editNoteId) {
-            document.getElementById('noteTitle').value = localStorage.getItem('editNoteTitle');
-            quill.root.innerHTML = localStorage.getItem('editNoteDesc');
-        }
-
         document.getElementById('saveNote').addEventListener('click', () => {
+            const sessionId = localStorage.getItem('sessionId');
             const title = document.getElementById('noteTitle').value;
-            const desc = quill.root.innerHTML;
+            const desc = quill.root.innerHTML; // Get HTML content from the editor
 
-            if (!title) {
-                alert("Please enter a note title.");
-                return;
-            }
-
-            const url = editNoteId ? '/updatenote' : '/addnote';
-            const body = editNoteId 
-                ? { id: editNoteId, title, desc, sessionId: localStorage.getItem('sessionId') }
-                : { title, desc, sessionId: localStorage.getItem('sessionId') };
-
-            fetch(url, {
+            fetch('/addnote', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(body)
+                body: JSON.stringify({ title, desc, sessionId })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     alert('Note saved successfully!');
-                    localStorage.removeItem('editNoteId');
-                    localStorage.removeItem('editNoteTitle');
-                    localStorage.removeItem('editNoteDesc');
-                    window.location.href = '/dashboard'; // Redirect to dashboard
+                    window.location.href = '/dashboard.html'; // Redirect to dashboard or notes page
                 } else {
-                    alert('Failed to save note: ' + data.message);
+                    alert('Failed to save note.');
                 }
             })
             .catch(error => {
