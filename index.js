@@ -30,6 +30,7 @@ app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
+// Serve new note page
 app.get('/newnote', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'newnote.html'));
 });
