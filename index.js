@@ -49,8 +49,8 @@ app.post('/register', (req, res) => {
 
 // API: Login a user
 app.post('/login', (req, res) => {
-  const { username, password } = req.body;
-  const user = users.find(user => user.username === username && user.password === password);
+  const { identifier, password } = req.body; // Use identifier to accept both username and email
+  const user = users.find(user => (user.username === identifier || user.email === identifier) && user.password === password);
   if (!user) {
     return res.json({ success: false, message: 'Invalid credentials' });
   }
