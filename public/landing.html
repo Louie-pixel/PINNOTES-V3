@@ -3,26 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome - Pinnotes</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f5f5f5;
-            font-family: Arial, sans-serif;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
+    <title>Pinnotes - Landing</title>
 </head>
 <body>
-    <script>
-        // Redirect to login page after a short delay
-        setTimeout(() => {
-            window.location.href = 'login.html'; // Redirect to login page
-        }, 1000); // Redirects after 1 second
-    </script>
-    <h1>Welcome to Pinnotes!</h1>
-    <p>Redirecting you to the login page...</p>
+    <div class="container">
+        <h1>Welcome to Pinnotes</h1>
+        <p>Your modern note-taking app!</p>
+        <a href="/signup" class="btn">Sign Up</a>
+        <a href="/login" class="btn">Login</a>
+    </div>
 </body>
 </html>
