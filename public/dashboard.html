@@ -3,215 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+    <title>User Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #fff;
-            color: #333;
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
             padding: 20px;
-            transition: background-color 0.3s, color 0.3s; /* Smooth transition */
+            color: #333;
         }
-        .note-container {
+
+        .dashboard-container {
+            max-width: 600px;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #4a4a4a;
+            margin-bottom: 20px;
+        }
+
+        .profile-info {
             display: flex;
-            flex-wrap: wrap; /* Allow notes to wrap */
-            gap: 20px; /* Space between notes */
-            margin-bottom: 20px; /* Space below notes */
+            align-items: center;
+            margin-bottom: 20px;
         }
-        .note {
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 10px;
-            background: #f9f9f9;
-            width: calc(50% - 10px); /* Two notes side by side */
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+
+        .profile-info img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin-right: 20px;
+            border: 2px solid #007bff; /* Blue border for the profile picture */
+            object-fit: cover;
         }
-        button {
-            margin-right: 5px;
-            cursor: pointer;
+
+        .profile-details {
+            flex: 1;
         }
-        .note-actions {
-            position: relative;
-            display: inline-block;
+
+        .profile-details h2 {
+            margin: 0;
+            color: #007bff; /* Blue color for the username */
         }
-        .dropdown {
-            display: none;
-            position: absolute;
-            background-color: white;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            z-index: 1;
+
+        .profile-details p {
+            margin: 5px 0;
+            line-height: 1.5;
         }
-        .dropdown button {
-            width: 100%;
-            text-align: left;
-            padding: 8px 12px;
+
+        #logout-button {
+            background-color: #dc3545; /* Red color for logout */
+            padding: 10px 15px;
             border: none;
-            background: none;
-            cursor: pointer;
-        }
-        .dropdown button:hover {
-            background-color: #f1f1f1;
-        }
-        .dark-mode {
-            background-color: #121212;
-            color: #ffffff;
-        }
-        .dark-mode .note {
-            background: #1e1e1e;
-            border-color: #333;
-        }
-        .dark-mode .actions-button {
-            color: white; /* Actions button color in dark mode */
-        }
-        .actions-button {
-            color: #333; /* Actions button color in light mode */
-        }
-        /* Set button colors in dropdown based on theme */
-        .dropdown button {
-            color: #333; /* Default to light mode */
-        }
-        .dark-mode .dropdown button {
-            color: white; /* Change to white in dark mode */
-        }
-        .profile {
-            margin-bottom: 20px; /* Space below profile */
-            padding: 10px;
-            border: 1px solid #ccc;
             border-radius: 5px;
-            background: #f9f9f9;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        #logout-button:hover {
+            background-color: #c82333; /* Darker red on hover */
         }
     </style>
 </head>
 <body>
-    <h1>Your Notes</h1>
-    <div class="profile">
-        <h2>Your Profile</h2>
-        <img src="default-profile.png" alt="Profile Picture" id="profilePicture" width="100">
-        <button onclick="window.location.href='profile.html'">Edit Profile</button>
+    <div class="dashboard-container">
+        <h1>User Dashboard</h1>
+        <div class="profile-info">
+            <img id="profile-picture" src="default-profile.png" alt="Profile Picture">
+            <div class="profile-details">
+                <h2 id="username">Username</h2>
+                <p id="email">Email</p>
+                <p id="name">Name: <span id="name-value"></span></p>
+                <p id="description">Description: <span id="description-value"></span></p>
+            </div>
+        </div>
+        <button id="update-profile-button">Update Profile</button>
+        <button id="logout-button">Logout</button>
     </div>
-    <button id="toggleMode">Switch to Dark Mode</button>
-    <div id="notesContainer" class="note-container"></div>
-    <button class="btn" onclick="window.location.href='newnote.html'">Create Note</button>
 
     <script>
         const sessionId = localStorage.getItem('sessionId');
 
-        document.getElementById('toggleMode').onclick = function() {
-            document.body.classList.toggle('dark-mode');
-            this.textContent = document.body.classList.contains('dark-mode') ? 'Switch to Light Mode' : 'Switch to Dark Mode';
-            updateActionsButtonTextColor(); // Update actions button text color
-        };
+        // Load user profile
+        async function loadProfile() {
+            if (!sessionId) {
+                alert('Session expired. Please log in again.');
+                window.location.href = '/login.html'; // Redirect to login if no session
+                return;
+            }
 
-        function fetchNotes() {
-            fetch('/getnotes', {
+            const response = await fetch('/profile', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sessionId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const notesContainer = document.getElementById('notesContainer');
-                    notesContainer.innerHTML = ''; // Clear existing notes
-                    // Sort notes to show pinned notes first
-                    const sortedNotes = data.notes.sort((a, b) => (a.pinned === b.pinned) ? 0 : a.pinned ? -1 : 1);
-                    sortedNotes.forEach(note => {
-                        // Only display notes with non-empty descriptions
-                        if (note.desc.trim() !== '') {
-                            notesContainer.innerHTML += `
-                                <div class="note">
-                                    <h3>${note.title}</h3>
-                                    <div>${note.desc}</div>
-                                    <div class="note-actions">
-                                        <button class="actions-button" onclick="toggleDropdown(event)">Actions</button>
-                                        <div class="dropdown">
-                                            <button onclick="editNote(${note.id}, '${note.title}', '${note.desc.replace(/'/g, "\\'")}')">Edit</button>
-                                            <button onclick="deleteNote(${note.id})">Delete</button>
-                                            <button onclick="archiveNote(${note.id})">Archive</button>
-                                            <button onclick="pinNote(${note.id})">${note.pinned ? 'Unpin' : 'Pin'}</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        }
-                    });
-                    updateActionsButtonTextColor(); // Update actions button text color
-                } else {
-                    alert(data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching notes:', error);
             });
+            const data = await response.json();
+
+            if (data.success) {
+                document.getElementById('username').textContent = data.profile.username;
+                document.getElementById('email').textContent = data.profile.email;
+                document.getElementById('name-value').textContent = data.profile.name || 'Not set';
+                document.getElementById('description-value').textContent = data.profile.description || 'Not set';
+                document.getElementById('profile-picture').src = data.profile.profilePicture || 'default-profile.png';
+            } else {
+                alert(data.message);
+                window.location.href = '/login.html'; // Redirect to login if unauthorized
+            }
         }
 
-        function updateActionsButtonTextColor() {
-            const actionsButtons = document.querySelectorAll('.actions-button');
-            actionsButtons.forEach(button => {
-                button.style.color = document.body.classList.contains('dark-mode') ? 'white' : '#333';
-            });
-        }
+        // Redirect to update profile
+        document.getElementById('update-profile-button').addEventListener('click', () => {
+            window.location.href = '/profile.html'; // Redirect to profile page
+        });
 
-        function toggleDropdown(event) {
-            const dropdown = event.target.nextElementSibling;
-            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-        }
+        // Logout user
+        document.getElementById('logout-button').addEventListener('click', () => {
+            localStorage.removeItem('sessionId');
+            window.location.href = '/login.html'; // Redirect to login page
+        });
 
-        function editNote(id, title, desc) {
-            localStorage.setItem('editNoteId', id);
-            localStorage.setItem('editNoteTitle', title);
-            localStorage.setItem('editNoteDesc', desc);
-            window.location.href = 'newnote.html'; // Redirect to create note page for editing
-        }
-
-        function deleteNote(id) {
-            fetch('/deletenote', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ id, sessionId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    fetchNotes(); // Refresh notes
-                } else {
-                    alert(data.message);
-                }
-            });
-        }
-
-        function archiveNote(id) {
-            // Implement archiving functionality here
-            console.log(`Archiving note with ID: ${id}`);
-        }
-
-        function pinNote(id) {
-            fetch('/pinnote', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ id, sessionId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    fetchNotes(); // Refresh notes
-                } else {
-                    alert(data.message);
-                }
-            });
-        }
-
-        // Fetch notes on page load
-        fetchNotes();
+        loadProfile();
     </script>
 </body>
 </html>
