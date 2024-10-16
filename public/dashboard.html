@@ -75,7 +75,7 @@
     <h1>Your Notes</h1>
     <button id="toggleMode">Switch to Dark Mode</button>
     <div id="notesContainer" class="note-container"></div>
-    <button onclick="window.location.href='/newnote'">Create New Note</button>
+    <button onclick="window.location.href='newnote.html'">Create New Note</button>
 
     <script>
         const sessionId = localStorage.getItem('sessionId');
@@ -135,7 +135,7 @@
             localStorage.setItem('editNoteId', id);
             localStorage.setItem('editNoteTitle', title);
             localStorage.setItem('editNoteDesc', desc);
-            window.location.href = '/newnote'; // Redirect to create note page for editing
+            window.location.href = 'newnote.html'; // Redirect to create note page for editing
         }
 
         function archiveNote(id) {
