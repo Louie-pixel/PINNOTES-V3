@@ -104,7 +104,9 @@
                 if (data.success) {
                     const notesContainer = document.getElementById('notesContainer');
                     notesContainer.innerHTML = ''; // Clear existing notes
-                    data.notes.forEach(note => {
+                    // Sort notes to show pinned notes first
+                    const sortedNotes = data.notes.sort((a, b) => (a.pinned === b.pinned) ? 0 : a.pinned ? -1 : 1);
+                    sortedNotes.forEach(note => {
                         // Only display notes with non-empty descriptions
                         if (note.desc.trim() !== '') {
                             notesContainer.innerHTML += `
@@ -117,7 +119,7 @@
                                             <button onclick="editNote(${note.id}, '${note.title}', '${note.desc.replace(/'/g, "\\'")}')">Edit</button>
                                             <button onclick="deleteNote(${note.id})">Delete</button>
                                             <button onclick="archiveNote(${note.id})">Archive</button>
-                                            <button onclick="pinNote(${note.id})">Pin</button>
+                                            <button onclick="pinNote(${note.id})">${note.pinned ? 'Unpin' : 'Pin'}</button>
                                         </div>
                                     </div>
                                 </div>
@@ -178,8 +180,22 @@
         }
 
         function pinNote(id) {
-            // Implement pinning functionality here
-            console.log(`Pinning note with ID: ${id}`);
+            fetch('/pinnote', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id, sessionId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    fetchNotes(); // Refresh notes
+                } else {
+                    alert(data.message);
+                }
+            });
         }
 
         // Fetch notes on page load
