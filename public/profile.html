@@ -5,78 +5,97 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="script.js" defer></script>
 </head>
 <body>
     <div class="profile-container">
         <h1>User Profile</h1>
-        <img id="profile-picture" src="default-profile.png" alt="Profile Picture" />
-        <form id="profile-form">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
-
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-
-            <label for="description">Description:</label>
-            <textarea id="description" name="description" rows="4"></textarea>
-
-            <label for="file-upload">Upload Profile Picture:</label>
-            <input type="file" id="file-upload" accept="image/*">
-
+        <div class="profile-info">
+            <img id="profile-picture" src="default-profile.png" alt="Profile Picture">
+            <div class="profile-details">
+                <h2 id="username">Username</h2>
+                <p id="email">Email</p>
+                <p id="name">Name: <span id="name-value"></span></p>
+                <p id="description">Description: <span id="description-value"></span></p>
+            </div>
+        </div>
+        <h2>Update Profile</h2>
+        <form id="update-profile-form">
+            <div>
+                <label for="name-input">Name:</label>
+                <input type="text" id="name-input" placeholder="Enter your name">
+            </div>
+            <div>
+                <label for="description-input">Description:</label>
+                <textarea id="description-input" placeholder="Enter a brief description"></textarea>
+            </div>
+            <div>
+                <label for="profile-picture-input">Upload Picture:</label>
+                <input type="file" id="profile-picture-input">
+            </div>
             <button type="submit">Update Profile</button>
         </form>
-        <button id="logout-btn">Logout</button>
+        <button id="logout-button">Logout</button>
     </div>
 
     <script>
-        document.getElementById('profile-form').addEventListener('submit', function(event) {
-            event.preventDefault();
+        let sessionId = localStorage.getItem('sessionId');
 
-            const username = document.getElementById('username').value;
-            const email = document.getElementById('email').value;
-            const description = document.getElementById('description').value;
-            const sessionId = localStorage.getItem('sessionId'); // Retrieve session ID from local storage
-
-            // Update user profile
-            fetch('/updateprofile', {
+        // Load user profile
+        async function loadProfile() {
+            const response = await fetch('/profile', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, email, description, sessionId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                if (data.success) {
-                    // Update profile picture if uploaded
-                    const fileInput = document.getElementById('file-upload');
-                    if (fileInput.files.length > 0) {
-                        const formData = new FormData();
-                        formData.append('file', fileInput.files[0]);
-
-                        fetch('/saveProfilePicture', {
-                            method: 'POST',
-                            body: JSON.stringify({ sessionId, pictureUrl: URL.createObjectURL(fileInput.files[0]) }), // Replace with actual upload logic
-                            headers: { 'Content-Type': 'application/json' }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            alert(data.message);
-                            if (data.success) {
-                                // Update the profile picture on the page
-                                document.getElementById('profile-picture').src = URL.createObjectURL(fileInput.files[0]);
-                            }
-                        });
-                    }
-                }
+                body: JSON.stringify({ sessionId })
             });
+            const data = await response.json();
+            if (data.success) {
+                document.getElementById('username').textContent = data.profile.username;
+                document.getElementById('email').textContent = data.profile.email;
+                document.getElementById('name-value').textContent = data.profile.name || 'Not set';
+                document.getElementById('description-value').textContent = data.profile.description || 'Not set';
+                document.getElementById('profile-picture').src = data.profile.profilePicture || 'default-profile.png';
+            } else {
+                alert(data.message);
+                window.location.href = '/login.html'; // Redirect to login if unauthorized
+            }
+        }
+
+        // Update user profile
+        document.getElementById('update-profile-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const name = document.getElementById('name-input').value;
+            const description = document.getElementById('description-input').value;
+            const profilePictureInput = document.getElementById('profile-picture-input');
+            let picture = 'default-profile.png';
+
+            // Simulate picture upload, replace with actual upload logic if needed
+            if (profilePictureInput.files.length > 0) {
+                const file = profilePictureInput.files[0];
+                // Here you can upload the file to a server and get the URL
+                // For this example, we are just using a placeholder
+                picture = URL.createObjectURL(file); // Simulating image upload
+            }
+
+            const response = await fetch('/updateprofile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, description, picture, sessionId })
+            });
+
+            const data = await response.json();
+            alert(data.message);
+            if (data.success) {
+                loadProfile(); // Reload profile to show updated info
+            }
         });
 
-        // Logout button functionality
-        document.getElementById('logout-btn').addEventListener('click', function() {
-            localStorage.removeItem('sessionId'); // Clear session ID
-            window.location.href = 'login.html'; // Redirect to login
+        // Logout user
+        document.getElementById('logout-button').addEventListener('click', () => {
+            localStorage.removeItem('sessionId');
+            window.location.href = '/login.html'; // Redirect to login page
         });
+
+        loadProfile();
     </script>
 </body>
 </html>
