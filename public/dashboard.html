@@ -49,6 +49,7 @@
             border: none;
             background: none;
             cursor: pointer;
+            color: inherit; /* Inherit color from parent */
         }
         .dropdown button:hover {
             background-color: #f1f1f1;
@@ -125,8 +126,8 @@
         }
 
         function updateActionsButtonTextColor() {
-            const actionsButtons = document.querySelectorAll('.actions-button');
-            actionsButtons.forEach(button => {
+            const dropdownButtons = document.querySelectorAll('.dropdown button');
+            dropdownButtons.forEach(button => {
                 button.style.color = document.body.classList.contains('dark-mode') ? 'white' : '#333';
             });
         }
