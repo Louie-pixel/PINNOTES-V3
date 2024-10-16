@@ -8,34 +8,74 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: url('assets/chalkboard.jpg') no-repeat center center fixed;
-            background-size: cover;
+            background-color: #fff; /* Default to light mode */
             color: #333;
             padding: 20px;
+            transition: background-color 0.3s, color 0.3s; /* Smooth transition */
         }
         .note {
             border: 1px solid #ccc;
             border-radius: 5px;
             padding: 10px;
             margin: 10px 0;
-            background: white;
+            background: #f9f9f9;
+            width: 100%; /* Prevents full width on the dashboard */
+            max-width: 600px; /* Max width for the notes */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
         }
         .note-actions {
-            display: flex;
-            justify-content: space-between;
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown {
+            display: none;
+            position: absolute;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+            z-index: 1;
+            min-width: 120px;
+        }
+        .dropdown-content {
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .dropdown-content button {
+            width: 100%;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+        }
+        .dropdown-content button:hover {
+            background-color: #f0f0f0;
         }
         button {
             margin-right: 5px;
+            cursor: pointer;
+        }
+        .dark-mode {
+            background-color: #121212;
+            color: #ffffff;
+        }
+        .dark-mode .note {
+            background: #1e1e1e;
+            border-color: #333;
         }
     </style>
 </head>
 <body>
     <h1>Your Notes</h1>
+    <button id="toggleMode">Switch to Dark Mode</button>
     <div id="notesContainer"></div>
     <button onclick="window.location.href='/newnote'">Create New Note</button>
 
     <script>
         const sessionId = localStorage.getItem('sessionId');
+
+        document.getElementById('toggleMode').onclick = function() {
+            document.body.classList.toggle('dark-mode');
+            this.textContent = document.body.classList.contains('dark-mode') ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+        };
 
         function fetchNotes() {
             fetch('/getnotes', {
@@ -56,10 +96,15 @@
                                 <h3>${note.title}</h3>
                                 <div>${note.desc}</div>
                                 <div class="note-actions">
-                                    <button onclick="editNote(${note.id})">Edit</button>
-                                    <button onclick="archiveNote(${note.id})">Archive</button>
-                                    <button onclick="pinNote(${note.id})">Pin</button>
-                                    <button onclick="deleteNote(${note.id})">Delete</button>
+                                    <button onclick="toggleDropdown(event)">Actions</button>
+                                    <div class="dropdown">
+                                        <div class="dropdown-content">
+                                            <button onclick="editNote(${note.id})">Edit</button>
+                                            <button onclick="archiveNote(${note.id})">Archive</button>
+                                            <button onclick="pinNote(${note.id})">Pin</button>
+                                            <button onclick="deleteNote(${note.id})">Delete</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         `;
@@ -73,9 +118,12 @@
             });
         }
 
+        function toggleDropdown(event) {
+            const dropdown = event.target.nextElementSibling;
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+
         function editNote(noteId) {
-            // Redirect to the new note page with pre-filled content
-            // You may need to modify your note creation logic to accept an existing note to edit
             const noteTitle = prompt("Enter the new title:");
             const noteDesc = prompt("Enter the new content (HTML):");
             if (noteTitle && noteDesc) {
