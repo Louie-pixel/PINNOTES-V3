@@ -3,37 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - PinNotes</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Login</title>
 </head>
 <body>
-    <div class="container">
-        <h1>Login to PinNotes</h1>
+    <h1>Login</h1>
+    <form id="loginForm">
         <input type="text" id="username" placeholder="Username" required>
-        <input type="password" id="password" placeholder="Password" required>
-        <button id="login-btn">Login</button>
-        <p>Don't have an account? <a href="signup.html">Sign up here</a></p>
-    </div>
+        <button type="submit">Login</button>
+    </form>
     <script>
-        document.getElementById('login-btn').onclick = () => {
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
             const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
 
             fetch('/login', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    localStorage.setItem('sessionId', data.sessionId);
-                    window.location.href = '/dashboard';
+                    alert('Login successful! Session ID: ' + data.sessionId);
+                    // Redirect to dashboard after successful login
+                    window.location.href = '/dashboard.html'; // Replace with your actual dashboard path
                 } else {
-                    alert(data.message);
+                    alert('Login failed: ' + data.message);
                 }
             });
-        };
+        });
     </script>
 </body>
 </html>
