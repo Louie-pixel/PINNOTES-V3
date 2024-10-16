@@ -7,15 +7,14 @@
     <title>Profile</title>
 </head>
 <body>
-    <div class="container">
-        <h2>User Profile</h2>
-        <img src="default-profile.png" alt="Profile Image">
-        <p>Username: <span id="usernameDisplay"></span></p>
-        <p>Email: <span id="emailDisplay"></span></p>
-        <form id="profilePicForm" enctype="multipart/form-data">
-            <label for="profilePic">Change Profile Picture:</label>
-            <input type="file" id="profilePic" accept="image/*">
-            <button type="submit" class="btn">Upload</button>
+    <div class="form-container">
+        <h2>Your Profile</h2>
+        <form id="profile-form">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <textarea name="description" placeholder="Profile Description"></textarea>
+            <input type="text" name="contact" placeholder="Contact Info">
+            <button type="submit">Update Profile</button>
         </form>
     </div>
     <script src="script.js"></script>
