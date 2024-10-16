@@ -55,14 +55,13 @@
             }
         });
 
-        // Populate fields if editing an existing note
-        window.onload = function() {
-            const editNoteId = localStorage.getItem('editNoteId');
-            if (editNoteId) {
-                document.getElementById('noteTitle').value = localStorage.getItem('editNoteTitle');
-                quill.root.innerHTML = localStorage.getItem('editNoteDesc');
-            }
-        };
+        // Check if there is a note to edit
+        const editNoteId = localStorage.getItem('editNoteId');
+        if (editNoteId) {
+            document.getElementById('noteTitle').value = localStorage.getItem('editNoteTitle');
+            const desc = localStorage.getItem('editNoteDesc');
+            quill.root.innerHTML = desc; // Load existing note content
+        }
 
         document.getElementById('saveNote').addEventListener('click', () => {
             const title = document.getElementById('noteTitle').value; // Get the note title
@@ -73,25 +72,26 @@
                 return;
             }
 
-            const method = localStorage.getItem('editNoteId') ? 'PUT' : 'POST'; // Use PUT for editing
-            const noteId = localStorage.getItem('editNoteId');
+            // Save or update the note
+            const url = editNoteId ? '/updatenote' : '/addnote';
+            const body = editNoteId 
+                ? { id: editNoteId, title, desc, sessionId: localStorage.getItem('sessionId') }
+                : { title, desc, sessionId: localStorage.getItem('sessionId') };
 
-            // Save or update the note via POST or PUT request
-            fetch(method === 'PUT' ? `/updatenote/${noteId}` : '/addnote', {
-                method: method,
+            fetch(url, {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    title,
-                    desc,
-                    sessionId: localStorage.getItem('sessionId') // Retrieve the session ID from local storage
-                })
+                body: JSON.stringify(body)
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     alert('Note saved successfully!');
+                    localStorage.removeItem('editNoteId'); // Clear the edit note ID
+                    localStorage.removeItem('editNoteTitle'); // Clear the title
+                    localStorage.removeItem('editNoteDesc'); // Clear the description
                     window.location.href = '/dashboard'; // Redirect to the dashboard after saving
                 } else {
                     alert('Failed to save note: ' + data.message);
