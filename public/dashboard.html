@@ -98,21 +98,24 @@
                     const notesContainer = document.getElementById('notesContainer');
                     notesContainer.innerHTML = ''; // Clear existing notes
                     data.notes.forEach(note => {
-                        notesContainer.innerHTML += `
-                            <div class="note">
-                                <h3>${note.title}</h3>
-                                <div>${note.desc}</div>
-                                <div class="note-actions">
-                                    <button class="actions-button" onclick="toggleDropdown(event)">Actions</button>
-                                    <div class="dropdown">
-                                        <button onclick="editNote(${note.id}, '${note.title}', '${note.desc.replace(/'/g, "\\'")}')">Edit</button>
-                                        <button onclick="deleteNote(${note.id})">Delete</button>
-                                        <button onclick="archiveNote(${note.id})">Archive</button>
-                                        <button onclick="pinNote(${note.id})">Pin</button>
+                        // Only display notes with non-empty descriptions
+                        if (note.desc.trim() !== '') {
+                            notesContainer.innerHTML += `
+                                <div class="note">
+                                    <h3>${note.title}</h3>
+                                    <div>${note.desc}</div>
+                                    <div class="note-actions">
+                                        <button class="actions-button" onclick="toggleDropdown(event)">Actions</button>
+                                        <div class="dropdown">
+                                            <button onclick="editNote(${note.id}, '${note.title}', '${note.desc.replace(/'/g, "\\'")}')">Edit</button>
+                                            <button onclick="deleteNote(${note.id})">Delete</button>
+                                            <button onclick="archiveNote(${note.id})">Archive</button>
+                                            <button onclick="pinNote(${note.id})">Pin</button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        `;
+                            `;
+                        }
                     });
                     updateActionsButtonTextColor(); // Update actions button text color
                 } else {
