@@ -1,24 +1,25 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Dashboard</title>
+  <meta charset="utf-8">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
 </head>
 <body>
-    <div class="sidebar">
-        <h2>Notes</h2>
-        <button id="new-note-btn">Create New Note</button>
-        <button id="archive-notes-btn">Archive Notes</button>
-        <button id="pin-notes-btn">Pin Notes</button>
-        <button id="view-archived-btn">View Archived Notes</button>
+  <div class="container">
+    <h1>Dashboard</h1>
+    <button id="create-note" class="btn btn-primary">Create New Note</button>
+    <div id="note-list">
+      <h2>Your Notes</h2>
+      <ul id="notes"></ul>
     </div>
-    <div class="main-content">
-        <h1>Your Notes</h1>
-        <input type="text" id="search" placeholder="Search notes...">
-        <ul id="note-list"></ul>
-    </div>
-    <script src="script.js"></script>
+  </div>
+  <script>
+    document.getElementById('create-note').addEventListener('click', function() {
+      window.open('/newnote', '_blank'); // Open new note in a new tab
+    });
+  </script>
 </body>
 </html>
