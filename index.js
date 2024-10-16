@@ -1,102 +1,114 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const path = require('path');
+const cors = require('cors');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// In-memory store for users, notes, and sessions
-let users = [];
-let notes = [];
-let sessions = {};  // Store active sessions by username
-
 // Middleware
+app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
 
-// Serve frontend
-app.get('/', (req, res) => {
-    res.redirect('/login');  // Redirect to login page
-});
+// In-memory store for notes (use a database in production)
+let notes = [];
+let sessionIds = {};
 
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
+// Function to generate session IDs
+function generateSessionId() {
+    return Math.random().toString(36).substring(2, 15);
+}
 
-app.get('/signup', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'signup.html'));
-});
-
-app.get('/dashboard', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
-});
-
-// Add the route for new note creation
-app.get('/newnote', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'newnote.html'));
-});
-
-// API: Register a user
-app.post('/register', (req, res) => {
-    const { email, username, password } = req.body;
-    if (users.find(user => user.email === email || user.username === username)) {
-        return res.json({ success: false, message: 'User already exists' });
-    }
-    users.push({ email, username, password });
-    return res.json({ success: true, message: 'User registered' });
-});
-
-// API: Login a user
+// Endpoint to create a new session
 app.post('/login', (req, res) => {
-    const { username, password } = req.body;
-    const user = users.find(user => user.username === username && user.password === password);
-    if (!user) {
-        return res.json({ success: false, message: 'Invalid credentials' });
-    }
-
-    // Create a session for the user
-    const sessionId = Date.now().toString();
-    sessions[sessionId] = { email: user.email, username: user.username };
-
-    return res.json({ success: true, message: 'Login successful', sessionId });
+    const sessionId = generateSessionId();
+    sessionIds[sessionId] = req.body.username; // Store the username with session ID
+    res.json({ success: true, sessionId });
 });
 
-// API: Add a note (Authenticated route)
+// Endpoint to add a new note
 app.post('/addnote', (req, res) => {
     const { title, desc, sessionId } = req.body;
-    const user = sessions[sessionId];
-
-    if (!user) {
-        return res.json({ success: false, message: 'Unauthorized. Please log in.' });
+    if (!title || !desc || !sessionIds[sessionId]) {
+        return res.status(400).json({ success: false, message: 'Invalid data or session expired.' });
     }
 
-    if (!title || !desc) {
-        return res.json({ success: false, message: 'Title and description required' });
-    }
-
-    const newNote = {
-        id: notes.length + 1,
-        title,
-        desc,
-        user: user.username
-    };
-    notes.push(newNote);
-    return res.json({ success: true, message: 'Note created' });
+    const note = { id: notes.length + 1, title, desc, pinned: false, archived: false };
+    notes.push(note);
+    res.json({ success: true });
 });
 
-// API: Get notes for a user
+// Endpoint to get notes for a user
 app.post('/getnotes', (req, res) => {
     const { sessionId } = req.body;
-    const user = sessions[sessionId];
-
-    if (!user) {
-        return res.json({ success: false, message: 'Unauthorized. Please log in.' });
+    if (!sessionIds[sessionId]) {
+        return res.status(401).json({ success: false, message: 'Unauthorized.' });
     }
 
-    const userNotes = notes.filter(note => note.user === user.username);
-    return res.json({ success: true, notes: userNotes });
+    const userNotes = notes.filter(note => !note.archived); // Get only active notes
+    res.json({ success: true, notes: userNotes });
+});
+
+// Endpoint to update a note
+app.post('/updatenote', (req, res) => {
+    const { id, title, desc, sessionId } = req.body;
+    if (!title || !desc || !sessionIds[sessionId]) {
+        return res.status(400).json({ success: false, message: 'Invalid data or session expired.' });
+    }
+
+    const note = notes.find(n => n.id === id);
+    if (note) {
+        note.title = title;
+        note.desc = desc;
+        res.json({ success: true });
+    } else {
+        res.status(404).json({ success: false, message: 'Note not found.' });
+    }
+});
+
+// Endpoint to archive a note
+app.post('/archivenote', (req, res) => {
+    const { id, sessionId } = req.body;
+    if (!sessionIds[sessionId]) {
+        return res.status(401).json({ success: false, message: 'Unauthorized.' });
+    }
+
+    const note = notes.find(n => n.id === id);
+    if (note) {
+        note.archived = true;
+        res.json({ success: true, message: 'Note archived.' });
+    } else {
+        res.status(404).json({ success: false, message: 'Note not found.' });
+    }
+});
+
+// Endpoint to pin a note
+app.post('/pinnote', (req, res) => {
+    const { id, sessionId } = req.body;
+    if (!sessionIds[sessionId]) {
+        return res.status(401).json({ success: false, message: 'Unauthorized.' });
+    }
+
+    const note = notes.find(n => n.id === id);
+    if (note) {
+        note.pinned = !note.pinned; // Toggle pinned status
+        res.json({ success: true, message: note.pinned ? 'Note pinned.' : 'Note unpinned.' });
+    } else {
+        res.status(404).json({ success: false, message: 'Note not found.' });
+    }
+});
+
+// Endpoint to delete a note
+app.post('/deletenote', (req, res) => {
+    const { id, sessionId } = req.body;
+    if (!sessionIds[sessionId]) {
+        return res.status(401).json({ success: false, message: 'Unauthorized.' });
+    }
+
+    notes = notes.filter(n => n.id !== id);
+    res.json({ success: true, message: 'Note deleted.' });
 });
 
 // Start the server
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
