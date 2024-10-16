@@ -77,17 +77,68 @@ app.post('/addnote', (req, res) => {
     return res.json({ success: true, message: 'Note added successfully' });
 });
 
-// API: Fetch notes (Authenticated route)
-app.post('/getnotes', (req, res) => {
-    const { sessionId } = req.body;
+// API: Edit a note (Authenticated route)
+app.post('/editnote', (req, res) => {
+    const { id, title, desc, sessionId } = req.body;
     const user = sessions[sessionId];
 
     if (!user) {
         return res.json({ success: false, message: 'Unauthorized. Please log in.' });
     }
 
-    const userNotes = notes.filter(note => note.email === user.email);
-    return res.json({ success: true, notes: userNotes });
+    const note = notes.find(note => note.id === id && note.email === user.email);
+    if (!note) {
+        return res.json({ success: false, message: 'Note not found' });
+    }
+
+    note.title = title;
+    note.desc = desc;
+
+    return res.json({ success: true, message: 'Note edited successfully' });
+});
+
+// API: Archive a note (Authenticated route)
+app.post('/archivenote', (req, res) => {
+    const { id, password, sessionId } = req.body;
+    const user = sessions[sessionId];
+
+    if (!user) {
+        return res.json({ success: false, message: 'Unauthorized. Please log in.' });
+    }
+
+    // Placeholder password check; implement your own password verification logic
+    if (password !== 'yourActualPassword') {
+        return res.json({ success: false, message: 'Invalid password' });
+    }
+
+    const noteIndex = notes.findIndex(note => note.id === id && note.email === user.email);
+    if (noteIndex !== -1) {
+        const archivedNote = notes[noteIndex];
+        notes.splice(noteIndex, 1); // Remove from active notes
+        // Optionally store in an archived notes array or object
+        // archivedNotes.push(archivedNote);
+        return res.json({ success: true, message: 'Note archived successfully' });
+    } else {
+        return res.json({ success: false, message: 'Note not found' });
+    }
+});
+
+// API: Pin a note (Authenticated route)
+app.post('/pinnote', (req, res) => {
+    const { id, sessionId } = req.body;
+    const user = sessions[sessionId];
+
+    if (!user) {
+        return res.json({ success: false, message: 'Unauthorized. Please log in.' });
+    }
+
+    const note = notes.find(note => note.id === id && note.email === user.email);
+    if (note) {
+        note.pinned = true; // Add a pinned property to the note
+        return res.json({ success: true, message: 'Note pinned successfully' });
+    } else {
+        return res.json({ success: false, message: 'Note not found' });
+    }
 });
 
 // API: Delete a note (Authenticated route)
@@ -99,7 +150,7 @@ app.post('/deletenote', (req, res) => {
         return res.json({ success: false, message: 'Unauthorized. Please log in.' });
     }
 
-    notes = notes.filter(note => note.id !== id);
+    notes = notes.filter(note => note.id !== parseInt(id) || note.email !== user.email);
     return res.json({ success: true, message: 'Note deleted successfully' });
 });
 
