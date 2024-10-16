@@ -19,10 +19,19 @@
         .btn {
             margin-top: 10px;
         }
+        .title-input {
+            width: 100%; /* Full width for the title input */
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
     <h1>Create New Note</h1>
+    <input type="text" id="noteTitle" class="title-input" placeholder="Enter note title" required>
     <div id="editor"></div>
     <button class="btn" id="saveNote">Save Note</button>
     <button class="btn" onclick="window.location.href='/dashboard'">Back to Dashboard</button>
@@ -47,8 +56,13 @@
         });
 
         document.getElementById('saveNote').addEventListener('click', () => {
-            const title = prompt("Enter the title for your note:"); // Ask for note title
+            const title = document.getElementById('noteTitle').value; // Get the note title
             const desc = quill.root.innerHTML; // Get the HTML content
+
+            if (!title) {
+                alert("Please enter a note title."); // Alert if title is empty
+                return;
+            }
 
             // Save the note via POST request
             fetch('/addnote', {
