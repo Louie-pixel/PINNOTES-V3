@@ -12,7 +12,7 @@ let sessions = {};  // Store active sessions by username
 
 // Middleware
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from 'public' folder
 app.use(express.urlencoded({ extended: true }));
 
 // Redirect to signup page by default
@@ -38,7 +38,7 @@ app.get('/dashboard.html', (req, res) => {
 });
 
 // Serve newnote.html
-app.get('/newnote', (req, res) => {
+app.get('/newnote.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'newnote.html'));
 });
 
