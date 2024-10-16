@@ -49,13 +49,9 @@
             border: none;
             cursor: pointer;
             text-align: left;
-            color: black; /* Default text color for light mode */
         }
         .dropdown-content button:hover {
             background-color: #f0f0f0;
-        }
-        .dark-mode .dropdown-content button {
-            color: white; /* Text color for dark mode */
         }
         button {
             margin-right: 5px;
@@ -68,6 +64,12 @@
         .dark-mode .note {
             background: #1e1e1e;
             border-color: #333;
+        }
+        .dark-mode .dropdown-content button {
+            color: white; /* White text in dark mode */
+        }
+        .dropdown-content button {
+            color: black; /* Black text in light mode */
         }
     </style>
 </head>
@@ -131,13 +133,11 @@
             dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
         }
 
-        function editNote(noteId, noteTitle, noteDesc) {
-            // Store the note data in localStorage for use in the create note page
+        function editNote(noteId, title, desc) {
             localStorage.setItem('editNoteId', noteId);
-            localStorage.setItem('editNoteTitle', noteTitle);
-            localStorage.setItem('editNoteDesc', noteDesc);
-            // Redirect to create note page
-            window.location.href = '/newnote';
+            localStorage.setItem('editNoteTitle', title);
+            localStorage.setItem('editNoteDesc', desc);
+            window.location.href = '/newnote'; // Redirect to newnote page for editing
         }
 
         function archiveNote(noteId) {
