@@ -3,20 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
     <link rel="stylesheet" href="style.css">
-    <title>Profile</title>
 </head>
 <body>
-    <div class="form-container">
-        <h2>Your Profile</h2>
-        <form id="profile-form">
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="email" name="email" placeholder="Email" required>
-            <textarea name="description" placeholder="Profile Description"></textarea>
-            <input type="text" name="contact" placeholder="Contact Info">
-            <button type="submit">Update Profile</button>
-        </form>
-    </div>
-    <script src="script.js"></script>
+    <h1>Edit Profile</h1>
+    <img src="default-profile.png" alt="Profile Picture" id="profilePicture" width="150">
+    <input type="file" id="pictureInput" accept="image/*">
+    <button id="saveButton">Save Profile Picture</button>
+    <button onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
+
+    <script>
+        const sessionId = localStorage.getItem('sessionId');
+
+        // Load profile on page load
+        function loadProfile() {
+            fetch('/profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ sessionId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('profilePicture').src = data.profile.profilePicture;
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error('Error loading profile:', error));
+        }
+
+        document.getElementById('saveButton').onclick = function() {
+            const fileInput = document.getElementById('pictureInput');
+            if (fileInput.files.length > 0) {
+                const reader = new FileReader();
+                reader.onloadend = function() {
+                    const pictureUrl = reader.result; // Base64 image data
+                    fetch('/saveProfilePicture', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ sessionId, pictureUrl })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message);
+                            document.getElementById('profilePicture').src = pictureUrl; // Update profile picture
+                        } else {
+                            alert(data.message);
+                        }
+                    });
+                };
+                reader.readAsDataURL(fileInput.files[0]); // Read file as base64
+            } else {
+                alert('Please select a picture to upload.');
+            }
+        };
+
+        // Load profile when the page is loaded
+        window.onload = loadProfile;
+    </script>
 </body>
 </html>
