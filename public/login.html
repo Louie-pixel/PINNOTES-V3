@@ -9,6 +9,8 @@
     <h1>Login</h1>
     <input type="text" id="username" placeholder="Enter your username" required>
     <button id="loginButton">Login</button>
+    <button id="signupButton">Sign Up</button>
+    
     <script>
         document.getElementById('loginButton').addEventListener('click', () => {
             const username = document.getElementById('username').value;
@@ -31,6 +33,10 @@
             .catch(error => {
                 console.error('Error:', error);
             });
+        });
+
+        document.getElementById('signupButton').addEventListener('click', () => {
+            window.location.href = '/signup.html'; // Redirect to signup page
         });
     </script>
 </body>
