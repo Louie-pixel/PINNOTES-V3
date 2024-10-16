@@ -68,30 +68,30 @@
 
     <script>
         document.getElementById('loginForm').onsubmit = function(event) {
-            event.preventDefault();
-            const identifier = document.getElementById('identifier').value;
-            const password = document.getElementById('password').value;
+    event.preventDefault();
+    const identifier = document.getElementById('identifier').value.trim(); // Ensure no leading/trailing spaces
+    const password = document.getElementById('password').value.trim(); // Ensure no leading/trailing spaces
 
-            fetch('/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ identifier, password })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    localStorage.setItem('sessionId', data.sessionId); // Save session ID
-                    window.location.href = '/dashboard'; // Redirect to dashboard
-                } else {
-                    alert(data.message); // Show error message
-                }
-            })
-            .catch(error => {
-                console.error('Error during login:', error);
-            });
-        };
+    fetch('/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ identifier, password })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            localStorage.setItem('sessionId', data.sessionId); // Save session ID
+            window.location.href = '/dashboard'; // Redirect to dashboard
+        } else {
+            alert(data.message); // Show error message
+        }
+    })
+    .catch(error => {
+        console.error('Error during login:', error);
+    });
+};
     </script>
 </body>
 </html>
