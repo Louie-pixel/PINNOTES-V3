@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
-const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -52,8 +51,12 @@ app.post('/register', (req, res) => {
 app.post('/login', (req, res) => {
     const { identifier, password } = req.body; // Use identifier to accept both username and email
     console.log('Login attempt:', { identifier, password }); // Log the login attempt
-    const user = users.find(user => (user.username === identifier || user.email === identifier) && user.password === password);
     
+    // Check if user exists based on email or username and validate password
+    const user = users.find(user => 
+        (user.username === identifier || user.email === identifier) && user.password === password
+    );
+
     if (!user) {
         return res.json({ success: false, message: 'Invalid credentials' });
     }
