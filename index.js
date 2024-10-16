@@ -46,7 +46,7 @@ app.get('/dashboard', (req, res) => {
     if (!sessionId || !sessions[sessionId]) {
         return res.redirect('/login');
     }
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
 app.get('/newnote', (req, res) => {
