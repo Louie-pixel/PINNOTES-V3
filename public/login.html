@@ -4,51 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Include a separate CSS file for styling -->
-</head>
-<body>
-    <div class="container">
-        <h1>Login</h1>
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="identifier">Username or Email:</label>
-                <input type="text" id="identifier" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" required>
-            </div>
-            <button type="submit">Login</button>
-            <p>Don't have an account? <a href="signup.html">Sign up here</a></p>
-        </form>
-    </div>
-
+    <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
     <script>
-        document.getElementById('loginForm').onsubmit = function(event) {
-            event.preventDefault();
-            const identifier = document.getElementById('identifier').value.trim();
-            const password = document.getElementById('password').value.trim();
+        async function login(event) {
+            event.preventDefault(); // Prevent form submission
 
-            fetch('/login', {
+            const identifier = document.getElementById('identifier').value;
+            const password = document.getElementById('password').value;
+
+            const response = await fetch('/login', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ identifier, password })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    localStorage.setItem('sessionId', data.sessionId); // Save session ID
-                    window.location.href = '/dashboard'; // Redirect to dashboard
-                } else {
-                    alert(data.message); // Show error message
-                }
-            })
-            .catch(error => {
-                console.error('Error during login:', error);
+                body: JSON.stringify({ identifier, password }),
             });
-        };
+
+            const result = await response.json();
+            alert(result.message); // Alert the message from the server
+            
+            if (result.success) {
+                window.location.href = '/dashboard'; // Redirect to dashboard on success
+            }
+        }
     </script>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Login</h1>
+        <form onsubmit="login(event)">
+            <label for="identifier">Email or Username:</label>
+            <input type="text" id="identifier" required>
+            <label for="password">Password:</label>
+            <input type="password" id="password" required>
+            <button type="submit">Login</button>
+        </form>
+        <p>Don't have an account? <a href="signup.html">Sign up here</a></p>
+    </div>
 </body>
 </html>
