@@ -4,30 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Sign Up</h1>
-    <form id="signup-form">
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button type="submit">Sign Up</button>
-    </form>
-    <p>Already have an account? <a href="/login">Login here</a></p>
+    <div class="container">
+        <h2>Sign Up</h2>
+        <form id="signupForm">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" class="form-control" placeholder="Enter name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" class="form-control" placeholder="Enter email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" class="form-control" placeholder="Enter password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Sign Up</button>
+        </form>
+        <p>Already have an account? <a href="/login">Login here</a></p>
+        <div id="signupMessage"></div>
+    </div>
+
     <script>
-        document.getElementById('signup-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const formData = new FormData(this);
-            fetch('/register', {
+        document.getElementById('signupForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            fetch('/signup', {
                 method: 'POST',
-                body: formData
-            }).then(response => response.json()).then(data => {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, email, password }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const signupMessage = document.getElementById('signupMessage');
                 if (data.success) {
-                    alert(data.message);
+                    signupMessage.innerHTML = '<p class="text-success">' + data.message + '</p>';
+                    // Redirect to login page after successful signup
                     window.location.href = '/login';
                 } else {
-                    alert(data.message);
+                    signupMessage.innerHTML = '<p class="text-danger">' + data.message + '</p>';
                 }
+            })
+            .catch(error => {
+                console.error('Error during signup:', error);
             });
         });
     </script>
