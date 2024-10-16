@@ -3,89 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Include your CSS file -->
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #fff;
-            color: #333;
+            background-color: #f0f4f8;
+            margin: 0;
             padding: 20px;
-            transition: background-color 0.3s, color 0.3s; /* Smooth transition */
         }
-        .note-container {
-            display: flex;
-            flex-wrap: wrap; /* Allow notes to wrap */
-            gap: 20px; /* Space between notes */
-            margin-bottom: 20px; /* Space below notes */
+        h1 {
+            color: #333;
         }
         .note {
             border: 1px solid #ccc;
             border-radius: 5px;
             padding: 10px;
-            background: #f9f9f9;
-            width: calc(50% - 10px); /* Two notes side by side */
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-        }
-        .note-actions {
-            position: relative;
-            display: inline-block;
-        }
-        .dropdown {
-            display: none;
-            position: absolute;
+            margin: 10px 0;
             background-color: white;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-            z-index: 1;
-            min-width: 120px;
         }
-        .dropdown-content {
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .dropdown-content button {
-            width: 100%;
-            background: none;
+        .button {
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
             border: none;
+            border-radius: 5px;
             cursor: pointer;
-            text-align: left;
-            color: #333; /* Default text color for light mode */
+            transition: background-color 0.3s;
         }
-        .dropdown-content button:hover {
-            background-color: #f0f0f0;
-        }
-        .dark-mode .dropdown-content button {
-            color: #ffffff; /* Text color for dark mode */
-        }
-        button {
-            margin-right: 5px;
-            cursor: pointer;
-        }
-        .dark-mode {
-            background-color: #121212;
-            color: #ffffff;
-        }
-        .dark-mode .note {
-            background: #1e1e1e;
-            border-color: #333;
+        .button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
-    <h1>Your Notes</h1>
-    <button id="toggleMode">Switch to Dark Mode</button>
-    <div id="notesContainer" class="note-container"></div>
-    <button onclick="window.location.href='newnote.html'">Create New Note</button>
+    <h1>Dashboard</h1>
+    <button class="button" id="addNoteButton">Create New Note</button>
+    <div id="notesContainer"></div>
 
     <script>
         const sessionId = localStorage.getItem('sessionId');
 
-        document.getElementById('toggleMode').onclick = function() {
-            document.body.classList.toggle('dark-mode');
-            this.textContent = document.body.classList.contains('dark-mode') ? 'Switch to Light Mode' : 'Switch to Dark Mode';
-        };
-
-        function fetchNotes() {
+        // Function to load notes for the user
+        function loadNotes() {
             fetch('/getnotes', {
                 method: 'POST',
                 headers: {
@@ -98,105 +58,29 @@
                 if (data.success) {
                     const notesContainer = document.getElementById('notesContainer');
                     notesContainer.innerHTML = ''; // Clear existing notes
+
                     data.notes.forEach(note => {
-                        notesContainer.innerHTML += `
-                            <div class="note">
-                                <h3>${note.title}</h3>
-                                <div>${note.desc}</div>
-                                <div class="note-actions">
-                                    <button onclick="toggleDropdown(event)">Actions</button>
-                                    <div class="dropdown">
-                                        <div class="dropdown-content">
-                                            <button onclick="editNote(${note.id}, '${note.title}', '${note.desc.replace(/'/g, "\\'")}')">Edit</button>
-                                            <button onclick="archiveNote(${note.id})">Archive</button>
-                                            <button onclick="pinNote(${note.id})">Pin</button>
-                                            <button onclick="deleteNote(${note.id})">Delete</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
+                        const noteElement = document.createElement('div');
+                        noteElement.className = 'note';
+                        noteElement.innerHTML = `<strong>${note.title}</strong><p>${note.desc}</p>`;
+                        notesContainer.appendChild(noteElement);
                     });
                 } else {
-                    alert(data.message);
+                    alert(data.message); // Show error message
                 }
             })
             .catch(error => {
-                console.error('Error fetching notes:', error);
+                console.error('Error:', error);
             });
         }
 
-        function toggleDropdown(event) {
-            const dropdown = event.target.nextElementSibling;
-            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-        }
+        // Add note button event listener
+        document.getElementById('addNoteButton').addEventListener('click', () => {
+            window.location.href = 'newnote.html'; // Redirect to new note page
+        });
 
-        function editNote(id, title, desc) {
-            localStorage.setItem('editNoteId', id);
-            localStorage.setItem('editNoteTitle', title);
-            localStorage.setItem('editNoteDesc', desc);
-            window.location.href = 'newnote.html'; // Redirect to create note page for editing
-        }
-
-        function archiveNote(id) {
-            fetch('/archivenote', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ id, sessionId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    fetchNotes(); // Refresh notes
-                } else {
-                    alert(data.message);
-                }
-            });
-        }
-
-        function pinNote(id) {
-            fetch('/pinnote', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ id, sessionId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    fetchNotes(); // Refresh notes
-                } else {
-                    alert(data.message);
-                }
-            });
-        }
-
-        function deleteNote(id) {
-            fetch('/deletenote', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ id, sessionId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    fetchNotes(); // Refresh notes
-                } else {
-                    alert(data.message);
-                }
-            });
-        }
-
-        // Fetch notes on page load
-        fetchNotes();
+        // Load notes on page load
+        document.addEventListener('DOMContentLoaded', loadNotes);
     </script>
 </body>
 </html>
