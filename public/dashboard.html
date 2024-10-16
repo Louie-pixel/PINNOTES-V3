@@ -131,61 +131,72 @@
             dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
         }
 
-        function editNote(noteId, title, desc) {
-            localStorage.setItem('editNoteId', noteId);
+        function editNote(id, title, desc) {
+            localStorage.setItem('editNoteId', id);
             localStorage.setItem('editNoteTitle', title);
             localStorage.setItem('editNoteDesc', desc);
-            window.location.href = '/newnote'; // Redirect to the new note page for editing
+            window.location.href = '/newnote'; // Redirect to create note page for editing
         }
 
-        function archiveNote(noteId) {
-            const password = prompt("Please enter your password to archive this note:");
+        function archiveNote(id) {
             fetch('/archivenote', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ id: noteId, password, sessionId })
+                body: JSON.stringify({ id, sessionId })
             })
             .then(response => response.json())
             .then(data => {
-                alert(data.message);
-                fetchNotes(); // Refresh notes
+                if (data.success) {
+                    alert(data.message);
+                    fetchNotes(); // Refresh notes
+                } else {
+                    alert(data.message);
+                }
             });
         }
 
-        function pinNote(noteId) {
+        function pinNote(id) {
             fetch('/pinnote', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ id: noteId, sessionId })
+                body: JSON.stringify({ id, sessionId })
             })
             .then(response => response.json())
             .then(data => {
-                alert(data.message);
-                fetchNotes(); // Refresh notes
+                if (data.success) {
+                    alert(data.message);
+                    fetchNotes(); // Refresh notes
+                } else {
+                    alert(data.message);
+                }
             });
         }
 
-        function deleteNote(noteId) {
+        function deleteNote(id) {
             fetch('/deletenote', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ id: noteId, sessionId })
+                body: JSON.stringify({ id, sessionId })
             })
             .then(response => response.json())
             .then(data => {
-                alert(data.message);
-                fetchNotes(); // Refresh notes
+                if (data.success) {
+                    alert(data.message);
+                    fetchNotes(); // Refresh notes
+                } else {
+                    alert(data.message);
+                }
             });
         }
 
-        // Fetch notes on load
-        window.onload = fetchNotes;
+        // Fetch notes on page load
+        fetchNotes();
     </script>
 </body>
 </html>
