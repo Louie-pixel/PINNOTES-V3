@@ -3,69 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Profile</title>
-    <link rel="stylesheet" href="style.css">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Your CSS file -->
 </head>
 <body>
-    <h1>Edit Profile</h1>
-    <img src="default-profile.png" alt="Profile Picture" id="profilePicture" width="150">
-    <input type="file" id="pictureInput" accept="image/*">
-    <button id="saveButton">Save Profile Picture</button>
-    <button onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
+    <div class="container">
+        <h1>User Profile</h1>
+        <form id="profileForm">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" placeholder="Enter your name" required>
+            
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" placeholder="Describe yourself" required></textarea>
+            
+            <label for="contact">Contact:</label>
+            <input type="text" id="contact" name="contact" placeholder="Enter your contact info" required>
+            
+            <button type="submit">Update Profile</button>
+        </form>
+        <div id="profileInfo"></div>
+    </div>
 
     <script>
-        const sessionId = localStorage.getItem('sessionId');
+        // Handle profile form submission
+        document.getElementById('profileForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const description = document.getElementById('description').value;
+            const contact = document.getElementById('contact').value;
+            const sessionId = localStorage.getItem('sessionId'); // Assume you save session ID in local storage
 
-        // Load profile on page load
+            fetch('/updateprofile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, description, contact, sessionId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Profile updated successfully');
+                    loadProfile(); // Reload profile data
+                } else {
+                    alert(data.message);
+                }
+            });
+        });
+
+        // Function to load user profile
         function loadProfile() {
+            const sessionId = localStorage.getItem('sessionId'); // Assume you save session ID in local storage
             fetch('/profile', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sessionId })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    document.getElementById('profilePicture').src = data.profile.profilePicture;
+                    const profileInfo = `
+                        <h2>Profile Information</h2>
+                        <p><strong>Name:</strong> ${data.profile.name}</p>
+                        <p><strong>Description:</strong> ${data.profile.description}</p>
+                        <p><strong>Contact:</strong> ${data.profile.contact}</p>
+                    `;
+                    document.getElementById('profileInfo').innerHTML = profileInfo;
                 } else {
                     alert(data.message);
                 }
-            })
-            .catch(error => console.error('Error loading profile:', error));
+            });
         }
 
-        document.getElementById('saveButton').onclick = function() {
-            const fileInput = document.getElementById('pictureInput');
-            if (fileInput.files.length > 0) {
-                const reader = new FileReader();
-                reader.onloadend = function() {
-                    const pictureUrl = reader.result; // Base64 image data
-                    fetch('/saveProfilePicture', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ sessionId, pictureUrl })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert(data.message);
-                            document.getElementById('profilePicture').src = pictureUrl; // Update profile picture
-                        } else {
-                            alert(data.message);
-                        }
-                    });
-                };
-                reader.readAsDataURL(fileInput.files[0]); // Read file as base64
-            } else {
-                alert('Please select a picture to upload.');
-            }
-        };
-
-        // Load profile when the page is loaded
+        // Load profile on page load
         window.onload = loadProfile;
     </script>
 </body>
