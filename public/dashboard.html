@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Profile</title>
+    <title>Dashboard</title>
     <link rel="stylesheet" href="styles.css">
     <style>
         body {
@@ -14,8 +14,8 @@
             color: #333;
         }
 
-        .profile-container {
-            max-width: 600px;
+        .dashboard-container {
+            max-width: 800px;
             margin: auto;
             padding: 30px;
             border: 1px solid #ccc;
@@ -25,76 +25,26 @@
             transition: all 0.3s ease;
         }
 
-        .profile-container:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        }
-
         h1 {
             text-align: center;
-            color: #4a4a4a;
-            margin-bottom: 20px;
+            color: #007bff; /* Blue color for the title */
         }
 
         .profile-info {
-            display: flex;
-            align-items: center;
             margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
         }
 
-        .profile-info img {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            margin-right: 20px;
-            border: 2px solid #007bff; /* Blue border for the profile picture */
-            object-fit: cover;
-        }
-
-        .profile-details {
-            flex: 1;
-        }
-
-        .profile-details h2 {
+        .profile-info h2 {
             margin: 0;
             color: #007bff; /* Blue color for the username */
         }
 
-        .profile-details p {
+        .profile-info p {
             margin: 5px 0;
-            line-height: 1.5;
-        }
-
-        form {
-            margin-top: 20px;
-            border-top: 1px solid #ccc;
-            padding-top: 20px;
-        }
-
-        form div {
-            margin-bottom: 15px;
-        }
-
-        label {
-            font-weight: bold;
-        }
-
-        input[type="text"], textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-            transition: border-color 0.3s ease;
-        }
-
-        input[type="text"]:focus, textarea:focus {
-            border-color: #007bff; /* Highlight border on focus */
-            outline: none;
-        }
-
-        input[type="file"] {
-            margin-top: 10px;
         }
 
         button {
@@ -119,43 +69,57 @@
         #logout-button:hover {
             background-color: #c82333; /* Darker red on hover */
         }
+
+        .notes-section {
+            margin-top: 20px;
+        }
+
+        .note-item {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin: 10px 0;
+            background-color: #f9f9f9;
+            transition: background-color 0.2s;
+        }
+
+        .note-item:hover {
+            background-color: #e9ecef; /* Light gray on hover */
+        }
+
+        .note-title {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .note-content {
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
-    <div class="profile-container">
-        <h1>User Profile</h1>
-        <div class="profile-info">
-            <img id="profile-picture" src="default-profile.png" alt="Profile Picture">
-            <div class="profile-details">
-                <h2 id="username">Username</h2>
-                <p id="email">Email</p>
-                <p id="name">Name: <span id="name-value"></span></p>
-                <p id="description">Description: <span id="description-value"></span></p>
-            </div>
+    <div class="dashboard-container">
+        <h1>Dashboard</h1>
+        <div class="profile-info" id="profile-info">
+            <h2 id="username">Username</h2>
+            <p id="email">Email</p>
+            <p id="name">Name: <span id="name-value"></span></p>
+            <p id="description">Description: <span id="description-value"></span></p>
         </div>
-        <h2>Update Profile</h2>
-        <form id="update-profile-form">
-            <div>
-                <label for="name-input">Name:</label>
-                <input type="text" id="name-input" placeholder="Enter your name">
-            </div>
-            <div>
-                <label for="description-input">Description:</label>
-                <textarea id="description-input" placeholder="Enter a brief description"></textarea>
-            </div>
-            <div>
-                <label for="profile-picture-input">Upload Picture:</label>
-                <input type="file" id="profile-picture-input">
-            </div>
-            <button type="submit">Update Profile</button>
-        </form>
+        <button id="update-profile-button">Update Profile</button>
         <button id="logout-button">Logout</button>
+
+        <div class="notes-section">
+            <h2>Your Notes</h2>
+            <button id="create-note-button">Create New Note</button>
+            <div id="notes-list"></div>
+        </div>
     </div>
 
     <script>
         const sessionId = localStorage.getItem('sessionId');
 
-        // Load user profile
+        // Load user profile on dashboard
         async function loadProfile() {
             if (!sessionId) {
                 alert('Session expired. Please log in again.');
@@ -175,40 +139,45 @@
                 document.getElementById('email').textContent = data.profile.email;
                 document.getElementById('name-value').textContent = data.profile.name || 'Not set';
                 document.getElementById('description-value').textContent = data.profile.description || 'Not set';
-                document.getElementById('profile-picture').src = data.profile.profilePicture || 'default-profile.png';
+                loadNotes(); // Load user's notes after loading profile
             } else {
                 alert(data.message);
                 window.location.href = '/login.html'; // Redirect to login if unauthorized
             }
         }
 
-        // Update user profile
-        document.getElementById('update-profile-form').addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const name = document.getElementById('name-input').value;
-            const description = document.getElementById('description-input').value;
-            const profilePictureInput = document.getElementById('profile-picture-input');
-            let picture = 'default-profile.png';
-
-            // Simulate picture upload, replace with actual upload logic if needed
-            if (profilePictureInput.files.length > 0) {
-                const file = profilePictureInput.files[0];
-                // Here you can upload the file to a server and get the URL
-                // For this example, we are just using a placeholder
-                picture = URL.createObjectURL(file); // Simulating image upload
-            }
-
-            const response = await fetch('/updateprofile', {
+        // Load user's notes
+        async function loadNotes() {
+            const response = await fetch('/notes', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, description, picture, sessionId })
+                body: JSON.stringify({ sessionId })
             });
-
             const data = await response.json();
-            alert(data.message);
-            if (data.success) {
-                loadProfile(); // Reload profile to show updated info
+
+            const notesList = document.getElementById('notes-list');
+            notesList.innerHTML = ''; // Clear existing notes
+
+            if (data.success && data.notes.length > 0) {
+                data.notes.forEach(note => {
+                    const noteItem = document.createElement('div');
+                    noteItem.className = 'note-item';
+                    noteItem.innerHTML = `<div class="note-title">${note.title}</div><div class="note-content">${note.content}</div>`;
+                    notesList.appendChild(noteItem);
+                });
+            } else {
+                notesList.innerHTML = '<p>No notes found.</p>';
             }
+        }
+
+        // Navigate to the note creation page
+        document.getElementById('create-note-button').addEventListener('click', () => {
+            window.location.href = '/newnote.html'; // Redirect to the create note page
+        });
+
+        // Navigate to the profile update page
+        document.getElementById('update-profile-button').addEventListener('click', () => {
+            window.location.href = '/profile.html'; // Redirect to the profile update page
         });
 
         // Logout user
@@ -217,7 +186,7 @@
             window.location.href = '/login.html'; // Redirect to login page
         });
 
-        loadProfile();
+        loadProfile(); // Load profile information on page load
     </script>
 </body>
 </html>
