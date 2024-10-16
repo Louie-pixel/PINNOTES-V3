@@ -34,8 +34,7 @@
     <div id="editor"></div>
     <button class="btn" id="saveNote">Save Note</button>
     <button class="btn" onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
-    <button class="btn" onclick="window.location.href='foldername/newnote.html'">Create Note</button>
-
+    <button class="btn" onclick="createNewNote()">Create New Note</button>
 
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script>
@@ -55,6 +54,17 @@
                 ]
             }
         });
+
+        // Function to create a new note
+        function createNewNote() {
+            // Clear the title input and Quill editor
+            document.getElementById('noteTitle').value = '';
+            quill.setContents([]); // Clear the editor content
+            // Optional: If you want to reset any editing states, clear local storage items
+            localStorage.removeItem('editNoteId');
+            localStorage.removeItem('editNoteTitle');
+            localStorage.removeItem('editNoteDesc');
+        }
 
         document.getElementById('saveNote').addEventListener('click', () => {
             const sessionId = localStorage.getItem('sessionId');
@@ -80,7 +90,10 @@
             });
         });
 
-        // Pre-fill editor if editing an existing note
+        // Clear editor when loading the page for new note
+        createNewNote(); // Call to ensure the editor starts empty
+
+        // Pre-fill editor if editing an existing note (optional)
         const editNoteId = localStorage.getItem('editNoteId');
         if (editNoteId) {
             document.getElementById('noteTitle').value = localStorage.getItem('editNoteTitle');
