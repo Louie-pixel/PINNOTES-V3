@@ -5,121 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile</title>
     <link rel="stylesheet" href="styles.css">
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-
-        .profile-container {
-            max-width: 600px;
-            margin: auto;
-            padding: 30px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            background-color: #ffffff;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .profile-container:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        h1 {
-            text-align: center;
-            color: #4a4a4a;
-            margin-bottom: 20px;
-        }
-
-        .profile-info {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .profile-info img {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            margin-right: 20px;
-            border: 2px solid #007bff; /* Blue border for the profile picture */
-            object-fit: cover;
-        }
-
-        .profile-details {
-            flex: 1;
-        }
-
-        .profile-details h2 {
-            margin: 0;
-            color: #007bff; /* Blue color for the username */
-        }
-
-        .profile-details p {
-            margin: 5px 0;
-            line-height: 1.5;
-        }
-
-        form {
-            margin-top: 20px;
-            border-top: 1px solid #ccc;
-            padding-top: 20px;
-        }
-
-        form div {
-            margin-bottom: 15px;
-        }
-
-        label {
-            font-weight: bold;
-        }
-
-        input[type="text"], textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-            transition: border-color 0.3s ease;
-        }
-
-        input[type="text"]:focus, textarea:focus {
-            border-color: #007bff; /* Highlight border on focus */
-            outline: none;
-        }
-
-        input[type="file"] {
-            margin-top: 10px;
-        }
-
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
-        }
-
-        button:hover {
-            background-color: #0056b3; /* Darker blue on hover */
-        }
-
-        #logout-button {
-            background-color: #dc3545; /* Red color for logout */
-        }
-
-        #logout-button:hover {
-            background-color: #c82333; /* Darker red on hover */
-        }
-    </style>
 </head>
 <body>
     <div class="profile-container">
@@ -153,23 +38,16 @@
     </div>
 
     <script>
-        const sessionId = localStorage.getItem('sessionId');
+        let sessionId = localStorage.getItem('sessionId');
 
         // Load user profile
         async function loadProfile() {
-            if (!sessionId) {
-                alert('Session expired. Please log in again.');
-                window.location.href = '/login.html'; // Redirect to login if no session
-                return;
-            }
-
             const response = await fetch('/profile', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sessionId })
             });
             const data = await response.json();
-
             if (data.success) {
                 document.getElementById('username').textContent = data.profile.username;
                 document.getElementById('email').textContent = data.profile.email;
