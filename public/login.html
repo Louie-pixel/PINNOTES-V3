@@ -55,6 +55,33 @@
         <button type="submit" class="button">Login</button>
     </form>
     <p>Don't have an account? <a href="signup.html">Sign up</a></p>
-    <script src="scripts.js"></script> <!-- Ensure this points to your JS file -->
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+            const identifier = document.getElementById('identifier').value;
+            const password = document.getElementById('password').value;
+
+            // Make an API call to log in the user
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ identifier, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message); // Show success message
+                    window.location.href = 'dashboard.html'; // Redirect to dashboard
+                } else {
+                    alert(data.message); // Show error message
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
 </body>
 </html>
