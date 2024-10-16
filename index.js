@@ -41,7 +41,7 @@ app.get('/dashboard.html', (req, res) => {
 });
 
 // Serve newnote.html for the "Create New Note" functionality
-app.get('/newnote', (req, res) => {
+app.get('/newnote.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'newnote.html'));
 });
 
