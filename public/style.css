@@ -53,3 +53,28 @@ a {
 a:hover {
     text-decoration: underline;
 }
+
+.sidebar {
+    background: #333;
+    color: white;
+    width: 200px;
+    height: 100vh;
+    position: fixed;
+}
+
+.content {
+    margin-left: 220px;
+    padding: 20px;
+}
+
+#notes-list {
+    list-style-type: none;
+}
+
+#search-bar {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
