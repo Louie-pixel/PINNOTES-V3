@@ -1,25 +1,25 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Dashboard</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-  <link rel="stylesheet" href="style.css">
-  <script src="script.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - PinNotes</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Dashboard</h1>
-    <button id="create-note" class="btn btn-primary">Create New Note</button>
-    <div id="note-list">
-      <h2>Your Notes</h2>
-      <ul id="notes"></ul>
+    <div class="sidebar">
+        <h2>PinNotes</h2>
+        <ul>
+            <li><a href="/newnote" target="_blank">Create New Note</a></li>
+            <li><a href="#" id="archive-notes">Archive Notes</a></li>
+            <li><a href="#" id="pin-notes">Pin Notes</a></li>
+        </ul>
     </div>
-  </div>
-  <script>
-    document.getElementById('create-note').addEventListener('click', function() {
-      window.open('/newnote', '_blank'); // Open new note in a new tab
-    });
-  </script>
+    <div class="main-content">
+        <h1>Your Notes</h1>
+        <input type="text" id="search-bar" placeholder="Search notes...">
+        <div id="note-list"></div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
