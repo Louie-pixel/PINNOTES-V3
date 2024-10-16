@@ -7,15 +7,11 @@
 </head>
 <body>
     <h1>Login</h1>
-    <form id="loginForm">
-        <input type="text" id="username" placeholder="Username" required>
-        <button type="submit">Login</button>
-    </form>
+    <input type="text" id="username" placeholder="Enter your username" required>
+    <button id="loginButton">Login</button>
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(event) {
-            event.preventDefault();
+        document.getElementById('loginButton').addEventListener('click', () => {
             const username = document.getElementById('username').value;
-
             fetch('/login', {
                 method: 'POST',
                 headers: {
@@ -26,12 +22,14 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Login successful! Session ID: ' + data.sessionId);
-                    // Redirect to dashboard after successful login
-                    window.location.href = '/dashboard.html'; // Replace with your actual dashboard path
+                    localStorage.setItem('sessionId', data.sessionId);
+                    window.location.href = '/newnote.html'; // Redirect to the create note page
                 } else {
-                    alert('Login failed: ' + data.message);
+                    alert('Login failed');
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
             });
         });
     </script>
