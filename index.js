@@ -119,7 +119,7 @@ app.post('/deletenote', (req, res) => {
     res.json({ success: true, message: 'Note deleted.' });
 });
 
-// Endpoint for the root URL
+// Redirect root URL to login page
 app.get('/', (req, res) => {
     res.redirect('/login.html'); // Redirect to login.html
 });
