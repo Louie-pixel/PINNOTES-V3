@@ -21,14 +21,14 @@ function generateSessionId() {
 }
 
 // Endpoint to create a new session (login)
-app.post('/login', (req, res) => {
+app.post('/login.html', (req, res) => {
     const sessionId = generateSessionId();
     sessionIds[sessionId] = req.body.username; // Store the username with session ID
     res.json({ success: true, sessionId });
 });
 
 // Endpoint to create a new session (signup)
-app.post('/signup', (req, res) => {
+app.post('/signup.html', (req, res) => {
     // You can implement signup logic here (e.g., storing user credentials)
     // For simplicity, we assume any request to signup is successful.
     const sessionId = generateSessionId();
