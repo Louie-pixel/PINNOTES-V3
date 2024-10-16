@@ -21,7 +21,7 @@ const isAuthenticated = (req) => {
 
 // Serve frontend
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.redirect('/login');  // Redirect to login page
 });
 
 app.get('/login', (req, res) => {
@@ -39,6 +39,7 @@ app.get('/dashboard', (req, res) => {
 app.get('/newnote', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'newnote.html'));
 });
+
 
 // API: Register a user
 app.post('/register', (req, res) => {
