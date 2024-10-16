@@ -20,11 +20,20 @@ function generateSessionId() {
     return Math.random().toString(36).substring(2, 15);
 }
 
-// Endpoint to create a new session
+// Endpoint to create a new session (login)
 app.post('/login', (req, res) => {
+    const { username } = req.body; // Extract username from request body
     const sessionId = generateSessionId();
-    sessionIds[sessionId] = req.body.username; // Store the username with session ID
+    sessionIds[sessionId] = username; // Store the username with session ID
     res.json({ success: true, sessionId });
+});
+
+// Endpoint to create a new user (signup)
+app.post('/signup', (req, res) => {
+    const { username } = req.body; // Extract username from request body
+    // Implement logic to store the user in your user database (this is just a placeholder)
+    // For now, just return success
+    res.json({ success: true, message: 'User created successfully' });
 });
 
 // Endpoint to add a new note
