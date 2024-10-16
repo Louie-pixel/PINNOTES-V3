@@ -31,6 +31,28 @@
             margin-right: 5px;
             cursor: pointer;
         }
+        .note-actions {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown {
+            display: none;
+            position: absolute;
+            background-color: white;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+        }
+        .dropdown button {
+            width: 100%;
+            text-align: left;
+            padding: 8px 12px;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+        .dropdown button:hover {
+            background-color: #f1f1f1;
+        }
         .dark-mode {
             background-color: #121212;
             color: #ffffff;
@@ -74,8 +96,13 @@
                                 <h3>${note.title}</h3>
                                 <div>${note.desc}</div>
                                 <div class="note-actions">
-                                    <button onclick="editNote(${note.id}, '${note.title}', '${note.desc.replace(/'/g, "\\'")}')">Edit</button>
-                                    <button onclick="deleteNote(${note.id})">Delete</button>
+                                    <button onclick="toggleDropdown(event)">Actions</button>
+                                    <div class="dropdown">
+                                        <button onclick="editNote(${note.id}, '${note.title}', '${note.desc.replace(/'/g, "\\'")}')">Edit</button>
+                                        <button onclick="deleteNote(${note.id})">Delete</button>
+                                        <button onclick="archiveNote(${note.id})">Archive</button>
+                                        <button onclick="pinNote(${note.id})">Pin</button>
+                                    </div>
                                 </div>
                             </div>
                         `;
@@ -89,11 +116,16 @@
             });
         }
 
+        function toggleDropdown(event) {
+            const dropdown = event.target.nextElementSibling;
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+
         function editNote(id, title, desc) {
             localStorage.setItem('editNoteId', id);
             localStorage.setItem('editNoteTitle', title);
             localStorage.setItem('editNoteDesc', desc);
-            window.location.href = 'newnotes.html'; // Redirect to create note page for editing
+            window.location.href = 'newnote.html'; // Redirect to create note page for editing
         }
 
         function deleteNote(id) {
@@ -113,6 +145,16 @@
                     alert(data.message);
                 }
             });
+        }
+
+        function archiveNote(id) {
+            // Implement archiving functionality here
+            console.log(`Archiving note with ID: ${id}`);
+        }
+
+        function pinNote(id) {
+            // Implement pinning functionality here
+            console.log(`Pinning note with ID: ${id}`);
         }
 
         // Fetch notes on page load
