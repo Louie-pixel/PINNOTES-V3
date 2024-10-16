@@ -29,10 +29,6 @@ app.get('/signup', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'signup.html'));
 });
 
-app.get('/profile', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'profile.html'));
-});
-
 app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
@@ -156,5 +152,5 @@ app.post('/updateprofile', (req, res) => {
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`Server running on http://192.168.0.106:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
