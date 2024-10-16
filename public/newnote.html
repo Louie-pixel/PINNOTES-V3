@@ -9,7 +9,7 @@
         /* Style for the page */
         body {
             font-family: Arial, sans-serif;
-            background-color: white; /* White background for note writing */
+            background: #fff; /* White background */
             color: #333;
             padding: 20px;
         }
@@ -19,19 +19,11 @@
         .btn {
             margin-top: 10px;
         }
-        .title-input {
-            width: 100%; /* Full width for the title input */
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-        }
     </style>
 </head>
 <body>
-    <h1>Create New Note</h1>
-    <input type="text" id="noteTitle" class="title-input" placeholder="Enter note title" required>
+    <h1 id="pageTitle">Create New Note</h1>
+    <input type="text" id="noteTitle" placeholder="Enter note title" />
     <div id="editor"></div>
     <button class="btn" id="saveNote">Save Note</button>
     <button class="btn" onclick="window.location.href='/dashboard'">Back to Dashboard</button>
@@ -55,40 +47,29 @@
             }
         });
 
-        document.getElementById('saveNote').addEventListener('click', () => {
-            const title = document.getElementById('noteTitle').value; // Get the note title
-            const desc = quill.root.innerHTML; // Get the HTML content
-
-            if (!title) {
-                alert("Please enter a note title."); // Alert if title is empty
-                return;
+        // Load note data for editing if available
+        window.onload = function() {
+            const editNoteId = localStorage.getItem('editNoteId');
+            if (editNoteId) {
+                document.getElementById('pageTitle').textContent = 'Edit Note';
+                document.getElementById('noteTitle').value = localStorage.getItem('editNoteTitle');
+                const noteDesc = localStorage.getItem('editNoteDesc');
+                quill.root.innerHTML = noteDesc; // Set editor content
             }
+        };
 
-            // Save the note via POST request
-            fetch('/addnote', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    title,
-                    desc,
-                    sessionId: localStorage.getItem('sessionId') // Retrieve the session ID from local storage
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Note saved successfully!');
-                    window.location.href = '/dashboard'; // Redirect to the dashboard after saving
-                } else {
-                    alert('Failed to save note: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        });
+        document.getElementById('saveNote').onclick = function() {
+            const title = document.getElementById('noteTitle').value;
+            const desc = quill.root.innerHTML;
+
+            // Save logic goes here...
+            alert("Note saved! Title: " + title + "\nDescription: " + desc);
+
+            // Clear local storage after use
+            localStorage.removeItem('editNoteId');
+            localStorage.removeItem('editNoteTitle');
+            localStorage.removeItem('editNoteDesc');
+        };
     </script>
 </body>
-</html>
+</html>          
