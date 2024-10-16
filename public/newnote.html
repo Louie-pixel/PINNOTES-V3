@@ -1,26 +1,53 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>New Note</title>
+  <meta charset="utf-8">
+  <title>Create New Note</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
 </head>
 <body>
-    <div class="container">
-        <h2>Create New Note</h2>
-        <form id="newNoteForm">
-            <div class="form-group">
-                <label for="title">Title:</label>
-                <input type="text" id="title" required>
-            </div>
-            <div class="form-group">
-                <label for="desc">Description:</label>
-                <textarea id="desc" required></textarea>
-            </div>
-            <button type="submit" class="btn">Add Note</button>
-        </form>
-    </div>
-    <script src="script.js"></script>
+  <div class="container">
+    <h1>Create New Note</h1>
+    <form id="new-note-form">
+      <div class="form-group">
+        <label for="title">Title:</label>
+        <input type="text" class="form-control" id="title" required>
+      </div>
+      <div class="form-group">
+        <label for="description">Description:</label>
+        <textarea class="form-control" id="description" rows="5" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-success">Save Note</button>
+    </form>
+    <button onclick="window.location.href='/dashboard'" class="btn btn-default">Back to Dashboard</button>
+  </div>
+  <script>
+    document.getElementById('new-note-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const title = document.getElementById('title').value;
+      const description = document.getElementById('description').value;
+
+      const sessionId = 'your_session_id'; // Get session ID from the user context
+
+      fetch('/addnote', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ title, desc: description, sessionId })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Note saved successfully!');
+          window.location.href = '/dashboard';
+        } else {
+          alert(data.message);
+        }
+      });
+    });
+  </script>
 </body>
 </html>
