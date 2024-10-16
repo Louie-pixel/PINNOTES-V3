@@ -53,6 +53,8 @@ app.post('/register', (req, res) => {
     return res.json({ success: true, message: 'User registered' });
 });
 
+// Other existing code...
+
 // API: Login a user
 app.post('/login', (req, res) => {
     const { identifier, password } = req.body; // Use identifier to accept both username and email
@@ -62,7 +64,7 @@ app.post('/login', (req, res) => {
     const user = users.find(user => 
         (user.username === identifier || user.email === identifier) && user.password === password
     );
-    
+
     if (!user) {
         console.log('Invalid credentials:', identifier);  // Log when credentials are invalid
         return res.json({ success: false, message: 'Invalid credentials' });
@@ -74,6 +76,28 @@ app.post('/login', (req, res) => {
     console.log('Login successful, session created:', { sessionId, user });
 
     return res.json({ success: true, message: 'Login successful', sessionId });
+});
+
+// Middleware to check for valid session
+function checkSession(req, res, next) {
+    const { sessionId } = req.body;
+    if (!sessions[sessionId]) {
+        return res.json({ success: false, message: 'Unauthorized. Please log in.' });
+    }
+    next();
+}
+
+// Use the middleware for protected routes
+app.post('/addnote', checkSession, (req, res) => {
+    const { title, desc, sessionId } = req.body;
+    const user = sessions[sessionId];
+
+    if (!title || !desc) {
+        return res.json({ success: false, message: 'Title and description required' });
+    }
+
+    notes.push({ id: Date.now(), email: user.email, title, desc, pinned: false });
+    return res.json({ success: true, message: 'Note added' });
 });
 
 // API: Add a note (Authenticated route)
