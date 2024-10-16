@@ -4,94 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
-        }
-        h2 {
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        input[type="text"],
-        input[type="email"],
-        input[type="password"] {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #5cb85c;
-            border: none;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #4cae4c;
-        }
-        .signup-link {
-            text-align: center;
-            margin-top: 10px;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css"> <!-- Include a separate CSS file for styling -->
 </head>
 <body>
     <div class="container">
-        <h2>Login</h2>
+        <h1>Login</h1>
         <form id="loginForm">
-            <input type="text" id="identifier" placeholder="Email or Username" required>
-            <input type="password" id="password" placeholder="Password" required>
+            <div class="form-group">
+                <label for="identifier">Username or Email:</label>
+                <input type="text" id="identifier" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" required>
+            </div>
             <button type="submit">Login</button>
+            <p>Don't have an account? <a href="signup.html">Sign up here</a></p>
         </form>
-        <div class="signup-link">
-            <p>Don't have an account? <a href="/signup">Sign up here</a></p>
-        </div>
     </div>
 
     <script>
         document.getElementById('loginForm').onsubmit = function(event) {
-    event.preventDefault();
-    const identifier = document.getElementById('identifier').value.trim(); // Ensure no leading/trailing spaces
-    const password = document.getElementById('password').value.trim(); // Ensure no leading/trailing spaces
+            event.preventDefault();
+            const identifier = document.getElementById('identifier').value.trim();
+            const password = document.getElementById('password').value.trim();
 
-    fetch('/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ identifier, password })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            localStorage.setItem('sessionId', data.sessionId); // Save session ID
-            window.location.href = '/dashboard'; // Redirect to dashboard
-        } else {
-            alert(data.message); // Show error message
-        }
-    })
-    .catch(error => {
-        console.error('Error during login:', error);
-    });
-};
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ identifier, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    localStorage.setItem('sessionId', data.sessionId); // Save session ID
+                    window.location.href = '/dashboard'; // Redirect to dashboard
+                } else {
+                    alert(data.message); // Show error message
+                }
+            })
+            .catch(error => {
+                console.error('Error during login:', error);
+            });
+        };
     </script>
 </body>
 </html>
