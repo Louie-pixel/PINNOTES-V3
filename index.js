@@ -121,7 +121,7 @@ app.post('/deletenote', (req, res) => {
 
 // Endpoint for the root URL
 app.get('/', (req, res) => {
-    res.send('<h1>Welcome to Pinnotes API</h1><p>Please use the API endpoints for operations.</p>');
+    res.redirect('/login.html'); // Redirect to login.html
 });
 
 // Start the server
