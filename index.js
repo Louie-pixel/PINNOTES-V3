@@ -20,17 +20,15 @@ app.get('/', (req, res) => {
     res.redirect('/signup.html');
 });
 
-// Serve login.html directly
+// Serve HTML pages
 app.get('/login.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-// Serve signup.html directly
 app.get('/signup.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'signup.html'));
 });
 
-// Serve other pages
 app.get('/profile.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'profile.html'));
 });
@@ -39,7 +37,7 @@ app.get('/dashboard.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
-// Serve newnote.html when /newnote is accessed
+// Serve newnote.html
 app.get('/newnote', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'newnote.html'));
 });
