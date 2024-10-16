@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 let users = [];
 let notes = [];
 let archivedNotes = [];
-let sessions = {}; // Store active sessions by username
+let sessions = {};  // Store active sessions by username
 
 // Middleware
 app.use(bodyParser.json());
@@ -20,19 +20,21 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get('/login', (req, res) => {
+// Serve login.html directly
+app.get('/login.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-app.get('/signup', (req, res) => {
+// Serve signup.html directly
+app.get('/signup.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'signup.html'));
 });
 
-app.get('/profile', (req, res) => {
+app.get('/profile.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'profile.html'));
 });
 
-app.get('/dashboard', (req, res) => {
+app.get('/dashboard.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
@@ -58,7 +60,6 @@ app.post('/login', (req, res) => {
     );
 
     if (!user) {
-        console.log('Invalid credentials for:', identifier); // Log invalid credentials
         return res.json({ success: false, message: 'Invalid credentials' });
     }
 
@@ -66,7 +67,6 @@ app.post('/login', (req, res) => {
     const sessionId = Date.now().toString();
     sessions[sessionId] = { email: user.email, username: user.username };
 
-    console.log('User logged in:', user.username); // Log successful login
     return res.json({ success: true, message: 'Login successful', sessionId });
 });
 
