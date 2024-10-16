@@ -78,7 +78,7 @@ app.post('/addnote', (req, res) => {
 });
 
 // API: Edit a note (Authenticated route)
-app.post('/editnote', (req, res) => {
+app.post('/updatenote', (req, res) => {
     const { id, title, desc, sessionId } = req.body;
     const user = sessions[sessionId];
 
@@ -86,7 +86,7 @@ app.post('/editnote', (req, res) => {
         return res.json({ success: false, message: 'Unauthorized. Please log in.' });
     }
 
-    const note = notes.find(note => note.id === id && note.email === user.email);
+    const note = notes.find(note => note.id === parseInt(id) && note.email === user.email);
     if (!note) {
         return res.json({ success: false, message: 'Note not found' });
     }
@@ -111,7 +111,7 @@ app.post('/archivenote', (req, res) => {
         return res.json({ success: false, message: 'Invalid password' });
     }
 
-    const noteIndex = notes.findIndex(note => note.id === id && note.email === user.email);
+    const noteIndex = notes.findIndex(note => note.id === parseInt(id) && note.email === user.email);
     if (noteIndex !== -1) {
         const archivedNote = notes[noteIndex];
         notes.splice(noteIndex, 1); // Remove from active notes
@@ -132,7 +132,7 @@ app.post('/pinnote', (req, res) => {
         return res.json({ success: false, message: 'Unauthorized. Please log in.' });
     }
 
-    const note = notes.find(note => note.id === id && note.email === user.email);
+    const note = notes.find(note => note.id === parseInt(id) && note.email === user.email);
     if (note) {
         note.pinned = true; // Add a pinned property to the note
         return res.json({ success: true, message: 'Note pinned successfully' });
