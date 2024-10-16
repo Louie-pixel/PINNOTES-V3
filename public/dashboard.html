@@ -49,9 +49,13 @@
             border: none;
             cursor: pointer;
             text-align: left;
+            color: black; /* Default text color for light mode */
         }
         .dropdown-content button:hover {
             background-color: #f0f0f0;
+        }
+        .dark-mode .dropdown-content button {
+            color: white; /* Text color for dark mode */
         }
         button {
             margin-right: 5px;
@@ -103,7 +107,7 @@
                                     <button onclick="toggleDropdown(event)">Actions</button>
                                     <div class="dropdown">
                                         <div class="dropdown-content">
-                                            <button onclick="editNote(${note.id})">Edit</button>
+                                            <button onclick="editNote(${note.id}, '${note.title}', '${note.desc}')">Edit</button>
                                             <button onclick="archiveNote(${note.id})">Archive</button>
                                             <button onclick="pinNote(${note.id})">Pin</button>
                                             <button onclick="deleteNote(${note.id})">Delete</button>
@@ -127,23 +131,13 @@
             dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
         }
 
-        function editNote(noteId) {
-            const noteTitle = prompt("Enter the new title:");
-            const noteDesc = prompt("Enter the new content (HTML):");
-            if (noteTitle && noteDesc) {
-                fetch('/editnote', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ id: noteId, title: noteTitle, desc: noteDesc, sessionId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert(data.message);
-                    fetchNotes(); // Refresh notes
-                });
-            }
+        function editNote(noteId, noteTitle, noteDesc) {
+            // Store the note data in localStorage for use in the create note page
+            localStorage.setItem('editNoteId', noteId);
+            localStorage.setItem('editNoteTitle', noteTitle);
+            localStorage.setItem('editNoteDesc', noteDesc);
+            // Redirect to create note page
+            window.location.href = '/newnote';
         }
 
         function archiveNote(noteId) {
