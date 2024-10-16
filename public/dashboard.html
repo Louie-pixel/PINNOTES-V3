@@ -3,27 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Login</title>
     <link rel="stylesheet" href="styles.css"> <!-- Include your CSS file -->
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f4f8;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
             margin: 0;
-            padding: 20px;
+            background-color: #f0f4f8;
+            font-family: Arial, sans-serif;
         }
         h1 {
             color: #333;
         }
-        .note {
+        form {
+            display: flex;
+            flex-direction: column;
+            width: 300px;
+        }
+        input {
+            margin: 10px 0;
+            padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            padding: 10px;
-            margin: 10px 0;
-            background-color: white;
         }
         .button {
-            padding: 10px 15px;
+            padding: 15px;
             background-color: #007BFF;
             color: white;
             border: none;
@@ -37,34 +45,35 @@
     </style>
 </head>
 <body>
-    <h1>Dashboard</h1>
-    <button class="button" id="addNoteButton">Create New Note</button>
-    <div id="notesContainer"></div>
-
+    <h1>Login</h1>
+    <form id="loginForm">
+        <label for="identifier">Username or Email:</label>
+        <input type="text" id="identifier" name="identifier" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <button type="submit" class="button">Login</button>
+    </form>
+    <p>Don't have an account? <a href="signup.html">Sign up</a></p>
     <script>
-        const sessionId = localStorage.getItem('sessionId');
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+            const identifier = document.getElementById('identifier').value;
+            const password = document.getElementById('password').value;
 
-        // Function to load notes for the user
-        function loadNotes() {
-            fetch('/getnotes', {
+            // Make an API call to log in the user
+            fetch('/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ sessionId })
+                body: JSON.stringify({ identifier, password })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    const notesContainer = document.getElementById('notesContainer');
-                    notesContainer.innerHTML = ''; // Clear existing notes
-
-                    data.notes.forEach(note => {
-                        const noteElement = document.createElement('div');
-                        noteElement.className = 'note';
-                        noteElement.innerHTML = `<strong>${note.title}</strong><p>${note.desc}</p>`;
-                        notesContainer.appendChild(noteElement);
-                    });
+                    alert(data.message); // Show success message
+                    localStorage.setItem('sessionId', data.sessionId); // Store session ID
+                    window.location.href = 'dashboard.html'; // Redirect to dashboard
                 } else {
                     alert(data.message); // Show error message
                 }
@@ -72,15 +81,7 @@
             .catch(error => {
                 console.error('Error:', error);
             });
-        }
-
-        // Add note button event listener
-        document.getElementById('addNoteButton').addEventListener('click', () => {
-            window.location.href = 'newnote.html'; // Redirect to new note page
         });
-
-        // Load notes on page load
-        document.addEventListener('DOMContentLoaded', loadNotes);
     </script>
 </body>
 </html>
