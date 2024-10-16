@@ -4,29 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Login</h1>
-    <form id="login-form">
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button type="submit">Login</button>
-    </form>
-    <p>Don't have an account? <a href="/signup">Sign up here</a></p>
+    <div class="container">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="usernameEmail">Username or Email</label>
+                <input type="text" id="usernameEmail" class="form-control" placeholder="Enter username or email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" class="form-control" placeholder="Enter password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+        <div id="loginMessage"></div>
+    </div>
+
     <script>
-        document.getElementById('login-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const formData = new FormData(this);
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const usernameEmail = document.getElementById('usernameEmail').value;
+            const password = document.getElementById('password').value;
+
             fetch('/login', {
                 method: 'POST',
-                body: formData
-            }).then(response => response.json()).then(data => {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ usernameEmail, password }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const loginMessage = document.getElementById('loginMessage');
                 if (data.success) {
-                    alert(data.message);
-                    window.location.href = `/dashboard?sessionId=${data.sessionId}`; // Redirect with session ID
+                    loginMessage.innerHTML = '<p class="text-success">' + data.message + '</p>';
+                    // Redirect to dashboard after successful login
+                    window.location.href = `/dashboard?sessionId=${data.sessionId}`;
                 } else {
-                    alert(data.message);
+                    loginMessage.innerHTML = '<p class="text-danger">' + data.message + '</p>';
                 }
+            })
+            .catch(error => {
+                console.error('Error during login:', error);
             });
         });
     </script>
