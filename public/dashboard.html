@@ -7,10 +7,17 @@
     <title>Dashboard</title>
 </head>
 <body>
-    <div class="container">
-        <h2>Dashboard</h2>
-        <button id="newNoteBtn" class="btn">New Note</button>
-        <div id="notesContainer"></div>
+    <div class="sidebar">
+        <h2>Notes</h2>
+        <button id="new-note-btn">Create New Note</button>
+        <button id="archive-notes-btn">Archive Notes</button>
+        <button id="pin-notes-btn">Pin Notes</button>
+        <button id="view-archived-btn">View Archived Notes</button>
+    </div>
+    <div class="main-content">
+        <h1>Your Notes</h1>
+        <input type="text" id="search" placeholder="Search notes...">
+        <ul id="note-list"></ul>
     </div>
     <script src="script.js"></script>
 </body>
