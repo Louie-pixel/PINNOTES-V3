@@ -73,6 +73,7 @@
             .then(data => {
                 if (data.success) {
                     alert(data.message); // Show success message
+                    localStorage.setItem('sessionId', data.sessionId); // Store sessionId
                     window.location.href = 'dashboard.html'; // Redirect to dashboard
                 } else {
                     alert(data.message); // Show error message
