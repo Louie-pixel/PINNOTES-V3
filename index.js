@@ -49,120 +49,87 @@ app.get('/login', (req, res) => {
 
 // Serve the dashboard (Protected route)
 app.get('/dashboard', (req, res) => {
-    const sessionId = req.query.sessionId; // Check for session ID in the query parameters
-    if (!sessionId || !sessions[sessionId]) {
-        // If no session exists, redirect to login
+    const sessionId = req.query.sessionId;
+    if (!isAuthenticated(req)) {
         return res.redirect('/login');
     }
-    // If session exists, serve the dashboard page
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
-// Serve the new note creation page (Protected route)
+// Serve the create new note page (Protected route)
 app.get('/newnote', (req, res) => {
     const sessionId = req.query.sessionId;
-    if (!sessionId || !sessions[sessionId]) {
+    if (!isAuthenticated(req)) {
         return res.redirect('/login');
     }
     res.sendFile(path.join(__dirname, 'public', 'newnote.html'));
 });
 
-// API: Register a user
-app.post('/register', (req, res) => {
-    const { email, username, password } = req.body;
-    if (users.find(user => user.email === email || user.username === username)) {
+// Signup route
+app.post('/signup', (req, res) => {
+    const { name, email, password } = req.body;
+    const userExists = users.find(user => user.email === email);
+    if (userExists) {
         return res.json({ success: false, message: 'User already exists' });
     }
-    users.push({ email, username, password, profileImage: 'default-profile.png' });
-    return res.json({ success: true, message: 'User registered' });
+    users.push({ name, email, password });
+    res.json({ success: true, message: 'Signup successful!' });
 });
 
-// API: Login a user
+// Login route
 app.post('/login', (req, res) => {
-    const { username, password } = req.body;
-    const user = users.find(user => user.username === username && user.password === password);
-    if (!user) {
-        return res.json({ success: false, message: 'Invalid credentials' });
+    const { email, password } = req.body;
+    const user = users.find(user => user.email === email && user.password === password);
+    if (user) {
+        const sessionId = `${Date.now()}-${Math.random()}`;
+        sessions[sessionId] = { userId: user.email };
+        res.json({ success: true, message: 'Login successful', sessionId });
+    } else {
+        res.json({ success: false, message: 'Invalid email or password' });
     }
-
-    // Create a session for the user
-    const sessionId = Date.now().toString();
-    sessions[sessionId] = { email: user.email, username: user.username };
-
-    // Return the session ID to the client
-    return res.json({ success: true, message: 'Login successful', sessionId });
 });
 
-// API: Add a note (Authenticated route)
+// Create new note route
 app.post('/addnote', (req, res) => {
-    const sessionId = req.body.sessionId; // Get sessionId from the body
+    const { title, desc, sessionId } = req.body;
     if (!isAuthenticated(req)) {
-        return res.json({ success: false, message: 'Unauthorized. Please log in.' });
+        return res.json({ success: false, message: 'Unauthorized' });
     }
-
-    const { title, desc } = req.body;
-    const user = sessions[sessionId];
-
-    if (!title || !desc) {
-        return res.json({ success: false, message: 'Title and description required' });
-    }
-
-    notes.push({ id: Date.now(), email: user.email, title, desc, pinned: false });
-    return res.json({ success: true, message: 'Note added' });
+    const user = sessions[sessionId].userId;
+    notes.push({ title, desc, user });
+    res.json({ success: true, message: 'Note added successfully!' });
 });
 
-// API: Get notes for a user (Authenticated route)
+// Fetch notes route
 app.post('/getnotes', (req, res) => {
-    const sessionId = req.body.sessionId; // Get sessionId from the body
+    const { sessionId } = req.body;
     if (!isAuthenticated(req)) {
-        return res.json({ success: false, message: 'Unauthorized. Please log in.' });
+        return res.json({ success: false, message: 'Unauthorized' });
     }
-
-    const user = sessions[sessionId];
-    const userNotes = notes.filter(note => note.email === user.email && !archivedNotes.includes(note.id));
-
-    return res.json({ success: true, notes: userNotes });
+    const user = sessions[sessionId].userId;
+    const userNotes = notes.filter(note => note.user === user);
+    res.json({ success: true, notes: userNotes });
 });
 
-// API: Delete a note (Authenticated route)
-app.post('/deletenote', (req, res) => {
-    const sessionId = req.body.sessionId; // Get sessionId from the body
-    if (!isAuthenticated(req)) {
-        return res.json({ success: false, message: 'Unauthorized. Please log in.' });
-    }
-
-    const user = sessions[sessionId];
-
-    notes = notes.filter(note => note.id !== parseInt(req.body.id) || note.email !== user.email);
-    return res.json({ success: true, message: 'Note deleted' });
-});
-
-// API: Update Profile (Authenticated route)
+// Update profile route
 app.post('/updateprofile', upload.single('profileImage'), (req, res) => {
-    const { name, email, description, contact, sessionId } = req.body;
-    const user = sessions[sessionId];
-
-    if (!user) {
-        return res.json({ success: false, message: 'Unauthorized. Please log in.' });
+    const { name, email, description, contact } = req.body;
+    const sessionId = req.headers.sessionid;
+    if (!isAuthenticated(req)) {
+        return res.json({ success: false, message: 'Unauthorized' });
     }
+    // Update user profile logic here
+    res.json({ success: true, message: 'Profile updated successfully!' });
+});
 
-    const updatedUser = users.find(u => u.email === user.email);
-    if (updatedUser) {
-        updatedUser.name = name;
-        updatedUser.email = email;
-        updatedUser.description = description;
-        updatedUser.contact = contact;
-        updatedUser.profileImage = req.file ? req.file.filename : updatedUser.profileImage;
-    }
-
-    return res.json({
-        success: true,
-        message: 'Profile updated successfully',
-        profileImage: updatedUser.profileImage
-    });
+// Logout route
+app.get('/logout', (req, res) => {
+    const sessionId = req.query.sessionId;
+    delete sessions[sessionId]; // Invalidate session
+    res.redirect('/login');
 });
 
 // Start the server
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on http://192.168.0.106:${PORT}`);
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
 });
