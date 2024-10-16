@@ -4,42 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
-    <script>
-        async function login(event) {
-            event.preventDefault(); // Prevent form submission
-
-            const identifier = document.getElementById('identifier').value;
-            const password = document.getElementById('password').value;
-
-            const response = await fetch('/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ identifier, password }),
-            });
-
-            const result = await response.json();
-            alert(result.message); // Alert the message from the server
-            
-            if (result.success) {
-                window.location.href = '/dashboard'; // Redirect to dashboard on success
-            }
-        }
-    </script>
+    <link rel="stylesheet" href="styles.css"> <!-- Update your CSS file path if necessary -->
 </head>
 <body>
-    <div class="login-container">
-        <h1>Login</h1>
-        <form onsubmit="login(event)">
-            <label for="identifier">Email or Username:</label>
-            <input type="text" id="identifier" required>
-            <label for="password">Password:</label>
-            <input type="password" id="password" required>
-            <button type="submit">Login</button>
-        </form>
-        <p>Don't have an account? <a href="signup.html">Sign up here</a></p>
-    </div>
+    <h1>Login</h1>
+    <form id="loginForm">
+        <label for="identifier">Username or Email:</label>
+        <input type="text" id="identifier" name="identifier" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <button type="submit">Login</button>
+    </form>
+    <p>Don't have an account? <a href="signup.html">Sign up</a></p>
+    <script src="scripts.js"></script> <!-- Ensure this points to your JS file -->
 </body>
 </html>
