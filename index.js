@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const path = require('path'); // Import path for serving static files
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -8,6 +9,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from the public directory
 
 // In-memory store for notes (use a database in production)
 let notes = [];
@@ -106,6 +108,11 @@ app.post('/deletenote', (req, res) => {
 
     notes = notes.filter(n => n.id !== id);
     res.json({ success: true, message: 'Note deleted.' });
+});
+
+// Endpoint for the root URL
+app.get('/', (req, res) => {
+    res.send('<h1>Welcome to Pinnotes API</h1><p>Please use the API endpoints for operations.</p>');
 });
 
 // Start the server
