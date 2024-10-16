@@ -30,6 +30,7 @@ app.get('/signup.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'signup.html'));
 });
 
+// Serve other pages
 app.get('/profile.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'profile.html'));
 });
