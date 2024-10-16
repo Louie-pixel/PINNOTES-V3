@@ -28,9 +28,9 @@
             })
             .then(response => response.json())
             .then(data => {
-                alert(data.message);
+                alert(data.message); // Show message
                 if (data.success) {
-                    window.location.href = '/login';  // Redirect to login after signup
+                    window.location.href = '/login'; // Redirect to login after signup
                 }
             });
         };
