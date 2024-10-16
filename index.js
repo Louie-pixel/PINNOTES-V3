@@ -15,9 +15,9 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 
-// Serve frontend
+// Redirect to signup page by default
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.redirect('/signup.html');
 });
 
 // Serve login.html directly
