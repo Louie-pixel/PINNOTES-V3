@@ -3,85 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Include your CSS file -->
+    <title>Your Dashboard</title>
+    <link rel="stylesheet" href="style.css">
     <style>
         body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f4f8;
             font-family: Arial, sans-serif;
-        }
-        h1 {
+            background-color: #fff;
             color: #333;
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s; /* Smooth transition */
         }
-        form {
+        .note-container {
             display: flex;
-            flex-direction: column;
-            width: 300px;
+            flex-wrap: wrap; /* Allow notes to wrap */
+            gap: 20px; /* Space between notes */
+            margin-bottom: 20px; /* Space below notes */
         }
-        input {
-            margin: 10px 0;
-            padding: 10px;
+        .note {
             border: 1px solid #ccc;
             border-radius: 5px;
+            padding: 10px;
+            background: #f9f9f9;
+            width: calc(50% - 10px); /* Two notes side by side */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
         }
-        .button {
-            padding: 15px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 5px;
+        button {
+            margin-right: 5px;
             cursor: pointer;
-            transition: background-color 0.3s;
         }
-        .button:hover {
-            background-color: #0056b3;
+        .dark-mode {
+            background-color: #121212;
+            color: #ffffff;
+        }
+        .dark-mode .note {
+            background: #1e1e1e;
+            border-color: #333;
         }
     </style>
 </head>
 <body>
-    <h1>Login</h1>
-    <form id="loginForm">
-        <label for="identifier">Username or Email:</label>
-        <input type="text" id="identifier" name="identifier" required>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-        <button type="submit" class="button">Login</button>
-    </form>
-    <p>Don't have an account? <a href="signup.html">Sign up</a></p>
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent the default form submission
-            const identifier = document.getElementById('identifier').value;
-            const password = document.getElementById('password').value;
+    <h1>Your Notes</h1>
+    <button id="toggleMode">Switch to Dark Mode</button>
+    <div id="notesContainer" class="note-container"></div>
+    <button onclick="window.location.href='newnotes.html'">Create New Note</button>
 
-            // Make an API call to log in the user
-            fetch('/login', {
+    <script>
+        const sessionId = localStorage.getItem('sessionId');
+
+        document.getElementById('toggleMode').onclick = function() {
+            document.body.classList.toggle('dark-mode');
+            this.textContent = document.body.classList.contains('dark-mode') ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+        };
+
+        function fetchNotes() {
+            fetch('/getnotes', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ identifier, password })
+                body: JSON.stringify({ sessionId })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message); // Show success message
-                    localStorage.setItem('sessionId', data.sessionId); // Store session ID
-                    window.location.href = 'dashboard.html'; // Redirect to dashboard
+                    const notesContainer = document.getElementById('notesContainer');
+                    notesContainer.innerHTML = ''; // Clear existing notes
+                    data.notes.forEach(note => {
+                        notesContainer.innerHTML += `
+                            <div class="note">
+                                <h3>${note.title}</h3>
+                                <div>${note.desc}</div>
+                                <div class="note-actions">
+                                    <button onclick="editNote(${note.id}, '${note.title}', '${note.desc.replace(/'/g, "\\'")}')">Edit</button>
+                                    <button onclick="deleteNote(${note.id})">Delete</button>
+                                </div>
+                            </div>
+                        `;
+                    });
                 } else {
-                    alert(data.message); // Show error message
+                    alert(data.message);
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
+                console.error('Error fetching notes:', error);
             });
-        });
+        }
+
+        function editNote(id, title, desc) {
+            localStorage.setItem('editNoteId', id);
+            localStorage.setItem('editNoteTitle', title);
+            localStorage.setItem('editNoteDesc', desc);
+            window.location.href = 'newnotes.html'; // Redirect to create note page for editing
+        }
+
+        function deleteNote(id) {
+            fetch('/deletenote', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id, sessionId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    fetchNotes(); // Refresh notes
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+
+        // Fetch notes on page load
+        fetchNotes();
     </script>
 </body>
 </html>
