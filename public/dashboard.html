@@ -26,6 +26,7 @@
             background: #f9f9f9;
             width: calc(50% - 10px); /* Two notes side by side */
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            position: relative; /* Added for dropdown positioning */
         }
         button {
             margin-right: 5px;
@@ -41,6 +42,7 @@
             background-color: white;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
             z-index: 1;
+            right: 0; /* Align dropdown to the right of the button */
         }
         .dropdown button {
             width: 100%;
@@ -66,10 +68,6 @@
         }
         .actions-button {
             color: #333; /* Actions button color in light mode */
-        }
-        /* Set button colors in dropdown based on theme */
-        .dropdown button {
-            color: #333; /* Default to light mode */
         }
         .dark-mode .dropdown button {
             color: white; /* Change to white in dark mode */
@@ -157,6 +155,12 @@
 
         function toggleDropdown(event) {
             const dropdown = event.target.nextElementSibling;
+            // Close all other dropdowns first
+            document.querySelectorAll('.dropdown').forEach(drop => {
+                if (drop !== dropdown) {
+                    drop.style.display = 'none';
+                }
+            });
             dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
         }
 
