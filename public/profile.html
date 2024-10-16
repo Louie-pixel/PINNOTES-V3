@@ -4,77 +4,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Your CSS file -->
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
 </head>
 <body>
-    <div class="container">
+    <div class="profile-container">
         <h1>User Profile</h1>
-        <form id="profileForm">
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" placeholder="Enter your name" required>
-            
+        <img id="profile-picture" src="default-profile.png" alt="Profile Picture" />
+        <form id="profile-form">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
             <label for="description">Description:</label>
-            <textarea id="description" name="description" placeholder="Describe yourself" required></textarea>
-            
-            <label for="contact">Contact:</label>
-            <input type="text" id="contact" name="contact" placeholder="Enter your contact info" required>
-            
+            <textarea id="description" name="description" rows="4"></textarea>
+
+            <label for="file-upload">Upload Profile Picture:</label>
+            <input type="file" id="file-upload" accept="image/*">
+
             <button type="submit">Update Profile</button>
         </form>
-        <div id="profileInfo"></div>
+        <button id="logout-btn">Logout</button>
     </div>
 
     <script>
-        // Handle profile form submission
-        document.getElementById('profileForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const name = document.getElementById('name').value;
-            const description = document.getElementById('description').value;
-            const contact = document.getElementById('contact').value;
-            const sessionId = localStorage.getItem('sessionId'); // Assume you save session ID in local storage
+        document.getElementById('profile-form').addEventListener('submit', function(event) {
+            event.preventDefault();
 
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const description = document.getElementById('description').value;
+            const sessionId = localStorage.getItem('sessionId'); // Retrieve session ID from local storage
+
+            // Update user profile
             fetch('/updateprofile', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, description, contact, sessionId })
+                body: JSON.stringify({ username, email, description, sessionId })
             })
             .then(response => response.json())
             .then(data => {
+                alert(data.message);
                 if (data.success) {
-                    alert('Profile updated successfully');
-                    loadProfile(); // Reload profile data
-                } else {
-                    alert(data.message);
+                    // Update profile picture if uploaded
+                    const fileInput = document.getElementById('file-upload');
+                    if (fileInput.files.length > 0) {
+                        const formData = new FormData();
+                        formData.append('file', fileInput.files[0]);
+
+                        fetch('/saveProfilePicture', {
+                            method: 'POST',
+                            body: JSON.stringify({ sessionId, pictureUrl: URL.createObjectURL(fileInput.files[0]) }), // Replace with actual upload logic
+                            headers: { 'Content-Type': 'application/json' }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            alert(data.message);
+                            if (data.success) {
+                                // Update the profile picture on the page
+                                document.getElementById('profile-picture').src = URL.createObjectURL(fileInput.files[0]);
+                            }
+                        });
+                    }
                 }
             });
         });
 
-        // Function to load user profile
-        function loadProfile() {
-            const sessionId = localStorage.getItem('sessionId'); // Assume you save session ID in local storage
-            fetch('/profile', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const profileInfo = `
-                        <h2>Profile Information</h2>
-                        <p><strong>Name:</strong> ${data.profile.name}</p>
-                        <p><strong>Description:</strong> ${data.profile.description}</p>
-                        <p><strong>Contact:</strong> ${data.profile.contact}</p>
-                    `;
-                    document.getElementById('profileInfo').innerHTML = profileInfo;
-                } else {
-                    alert(data.message);
-                }
-            });
-        }
-
-        // Load profile on page load
-        window.onload = loadProfile;
+        // Logout button functionality
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            localStorage.removeItem('sessionId'); // Clear session ID
+            window.location.href = 'login.html'; // Redirect to login
+        });
     </script>
 </body>
 </html>
