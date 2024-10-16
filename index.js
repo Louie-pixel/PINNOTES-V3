@@ -106,6 +106,25 @@ app.post('/getnotes', (req, res) => {
     return res.json({ success: true, notes: userNotes });
 });
 
+// API: Pin a note
+app.post('/pinnote', (req, res) => {
+    const { id, sessionId } = req.body;
+    const user = sessions[sessionId];
+
+    if (!user) {
+        return res.json({ success: false, message: 'Unauthorized. Please log in.' });
+    }
+
+    const noteToPin = notes.find(note => note.id === id && note.email === user.email);
+    if (!noteToPin) {
+        return res.json({ success: false, message: 'Note not found' });
+    }
+
+    // Toggle pin status
+    noteToPin.pinned = !noteToPin.pinned;
+    return res.json({ success: true, message: noteToPin.pinned ? 'Note pinned' : 'Note unpinned' });
+});
+
 // API: Archive a note
 app.post('/archivenote', (req, res) => {
     const { id, sessionId } = req.body;
@@ -170,5 +189,5 @@ app.post('/updateprofile', (req, res) => {
 
 // Start the server
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+     console.log(`Server running on http://192.168.0.106:${PORT}`);
 });
