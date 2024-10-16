@@ -30,7 +30,7 @@ app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
-// Serve new note page
+// Add the route for new note creation
 app.get('/newnote', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'newnote.html'));
 });
