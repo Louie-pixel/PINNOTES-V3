@@ -1,92 +1,117 @@
-// script.js
+document.addEventListener("DOMContentLoaded", () => {
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const profileForm = document.getElementById('profile-form');
+    const newNoteBtn = document.getElementById('new-note-btn');
+    const noteList = document.getElementById('note-list');
+    const sessionId = sessionStorage.getItem('sessionId');
 
-const baseUrl = ''; // Define your base URL if using a different path
-
-// Function to handle user registration
-document.getElementById('signupForm')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('email').value;
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-
-    const response = await fetch('/register', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, username, password })
-    });
-
-    const data = await response.json();
-    alert(data.message);
-    if (data.success) {
-        window.location.href = '/login';
-    }
-});
-
-// Function to handle user login
-document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const usernameEmail = document.getElementById('usernameEmail').value;
-    const password = document.getElementById('password').value;
-
-    const response = await fetch('/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ usernameEmail, password })
-    });
-
-    const data = await response.json();
-    alert(data.message);
-    if (data.success) {
-        window.location.href = `/dashboard?sessionId=${data.sessionId}`;
-    }
-});
-
-// Function to handle note addition
-document.getElementById('newNoteForm')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const title = document.getElementById('title').value;
-    const desc = document.getElementById('desc').value;
-    const sessionId = new URLSearchParams(window.location.search).get('sessionId');
-
-    const response = await fetch('/addnote', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ title, desc, sessionId })
-    });
-
-    const data = await response.json();
-    alert(data.message);
-    if (data.success) {
-        window.location.href = '/dashboard?sessionId=' + sessionId;
-    }
-});
-
-// Function to load notes in the dashboard
-document.addEventListener('DOMContentLoaded', async () => {
-    const sessionId = new URLSearchParams(window.location.search).get('sessionId');
-    const response = await fetch('/getnotes', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ sessionId })
-    });
-
-    const data = await response.json();
-    if (data.success) {
-        const notesContainer = document.getElementById('notesContainer');
-        data.notes.forEach(note => {
-            const noteElement = document.createElement('div');
-            noteElement.innerHTML = `<h3>${note.title}</h3><p>${note.desc}</p>`;
-            notesContainer.appendChild(noteElement);
+    // Handle login
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(loginForm);
+            const data = Object.fromEntries(formData.entries());
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+            const result = await response.json();
+            if (result.success) {
+                sessionStorage.setItem('sessionId', result.sessionId);
+                window.location.href = '/dashboard';
+            } else {
+                alert(result.message);
+            }
         });
-    } else {
-        alert(data.message);
     }
+
+    // Handle signup
+    if (signupForm) {
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(signupForm);
+            const data = Object.fromEntries(formData.entries());
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+            const result = await response.json();
+            alert(result.message);
+            if (result.success) {
+                window.location.href = '/login';
+            }
+        });
+    }
+
+    // Load notes
+    const loadNotes = async () => {
+        const response = await fetch('/getnotes', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ sessionId }),
+        });
+        const result = await response.json();
+        if (result.success) {
+            noteList.innerHTML = result.notes.map(note => `<li>${note.title} <button onclick="deleteNote(${note.id})">Delete</button> <button onclick="archiveNote(${note.id})">Archive</button></li>`).join('');
+        } else {
+            alert(result.message);
+        }
+    };
+
+    loadNotes();
+
+    // Handle new note creation
+    newNoteBtn.addEventListener('click', async () => {
+        const title = prompt('Enter note title:');
+        const desc = prompt('Enter note description:');
+        if (title && desc) {
+            const response = await fetch('/addnote', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ title, desc, sessionId }),
+            });
+            const result = await response.json();
+            alert(result.message);
+            if (result.success) loadNotes();
+        }
+    });
+
+    // Delete note
+    window.deleteNote = async (id) => {
+        const response = await fetch('/deletenote', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id, sessionId }),
+        });
+        const result = await response.json();
+        alert(result.message);
+        if (result.success) loadNotes();
+    };
+
+    // Archive note
+    window.archiveNote = async (id) => {
+        const response = await fetch('/archivenote', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id, sessionId }),
+        });
+        const result = await response.json();
+        alert(result.message);
+        if (result.success) loadNotes();
+    };
 });
