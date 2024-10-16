@@ -45,27 +45,29 @@ app.post('/register', (req, res) => {
         return res.json({ success: false, message: 'User already exists' });
     }
     users.push({ email, username, password });
-    console.log('Current users:', users); // Log users after registration
+    console.log('Current users:', users);  // Log users after registration
     return res.json({ success: true, message: 'User registered' });
 });
 
 // API: Login a user
 app.post('/login', (req, res) => {
     const { identifier, password } = req.body; // Use identifier to accept both username and email
-    console.log('Login attempt:', { identifier, password }); // Log the login attempt
-    
+    console.log('Login attempt:', { identifier, password });  // Log the login attempt
+
     // Check if user exists based on email or username and validate password
     const user = users.find(user => 
         (user.username === identifier || user.email === identifier) && user.password === password
     );
-
+    
     if (!user) {
+        console.log('Invalid credentials:', identifier);  // Log when credentials are invalid
         return res.json({ success: false, message: 'Invalid credentials' });
     }
 
     // Create a session for the user
     const sessionId = Date.now().toString();
     sessions[sessionId] = { email: user.email, username: user.username };
+    console.log('Login successful, session created:', { sessionId, user });
 
     return res.json({ success: true, message: 'Login successful', sessionId });
 });
