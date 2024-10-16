@@ -31,8 +31,7 @@ app.post('/login', (req, res) => {
 // Endpoint to create a new user (signup)
 app.post('/signup', (req, res) => {
     const { username } = req.body; // Extract username from request body
-    // Implement logic to store the user in your user database (this is just a placeholder)
-    // For now, just return success
+    // Here you can add logic to store the user in your database
     res.json({ success: true, message: 'User created successfully' });
 });
 
