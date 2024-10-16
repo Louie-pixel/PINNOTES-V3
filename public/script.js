@@ -1,91 +1,92 @@
-async function postData(url = '', data = {}) {
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data)
-  });
-  return await response.json();
-}
+// script.js
 
-document.addEventListener('DOMContentLoaded', () => {
-  const loginBtn = document.getElementById('loginBtn');
-  const signupBtn = document.getElementById('signupBtn');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const submitBtn = document.getElementById('submit');
-  const notesContainer = document.getElementById('notesContainer');
-  const user = JSON.parse(localStorage.getItem('user'));
+const baseUrl = ''; // Define your base URL if using a different path
 
-  if (user && user.email) {
-    loginBtn.style.display = 'none';
-    signupBtn.style.display = 'none';
-    logoutBtn.style.display = 'block';
-    fetchNotes();
-  }
+// Function to handle user registration
+document.getElementById('signupForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
 
-  loginBtn.addEventListener('click', async () => {
-    const email = prompt('Enter your email:');
-    const password = prompt('Enter your password:');
-    const response = await postData('/login', { email, password });
-    if (response.success) {
-      alert('Login successful!');
-      localStorage.setItem('user', JSON.stringify({ email }));
-      location.reload();
-    } else {
-      alert(response.message);
+    const response = await fetch('/register', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, username, password })
+    });
+
+    const data = await response.json();
+    alert(data.message);
+    if (data.success) {
+        window.location.href = '/login';
     }
-  });
+});
 
-  signupBtn.addEventListener('click', async () => {
-    const email = prompt('Enter your email:');
-    const password = prompt('Enter your password:');
-    const response = await postData('/register', { email, password });
-    alert(response.message);
-  });
+// Function to handle user login
+document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const usernameEmail = document.getElementById('usernameEmail').value;
+    const password = document.getElementById('password').value;
 
-  logoutBtn.addEventListener('click', () => {
-    localStorage.removeItem('user');
-    location.reload();
-  });
+    const response = await fetch('/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ usernameEmail, password })
+    });
 
-  submitBtn.addEventListener('click', async () => {
+    const data = await response.json();
+    alert(data.message);
+    if (data.success) {
+        window.location.href = `/dashboard?sessionId=${data.sessionId}`;
+    }
+});
+
+// Function to handle note addition
+document.getElementById('newNoteForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
     const title = document.getElementById('title').value;
     const desc = document.getElementById('desc').value;
-    const email = JSON.parse(localStorage.getItem('user'))?.email;
-    if (!email) {
-      alert('Please log in first!');
-      return;
-    }
-    const response = await postData('/addnote', { title, desc, email });
-    if (response.success) {
-      alert('Note added!');
-      fetchNotes();
-    }
-  });
+    const sessionId = new URLSearchParams(window.location.search).get('sessionId');
 
-  async function fetchNotes() {
-    const email = JSON.parse(localStorage.getItem('user'))?.email;
-    const response = await postData('/getnotes', { email });
-    notesContainer.innerHTML = '';
-    response.notes.forEach(note => {
-      notesContainer.innerHTML += `
-        <div class="col-md-4">
-          <div class="card mb-3">
-            <div class="card-body">
-              <h5 class="card-title">${note.title}</h5>
-              <p class="card-text">${note.desc}</p>
-              <button class="btn btn-danger" onclick="deleteNote(${note.id})">Delete</button>
-            </div>
-          </div>
-        </div>
-      `;
+    const response = await fetch('/addnote', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ title, desc, sessionId })
     });
-  }
 
-  window.deleteNote = async function(id) {
-    const email = JSON.parse(localStorage.getItem('user'))?.email;
-    await postData('/deletenote', { id, email });
-    fetchNotes();
-  }
+    const data = await response.json();
+    alert(data.message);
+    if (data.success) {
+        window.location.href = '/dashboard?sessionId=' + sessionId;
+    }
+});
+
+// Function to load notes in the dashboard
+document.addEventListener('DOMContentLoaded', async () => {
+    const sessionId = new URLSearchParams(window.location.search).get('sessionId');
+    const response = await fetch('/getnotes', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ sessionId })
+    });
+
+    const data = await response.json();
+    if (data.success) {
+        const notesContainer = document.getElementById('notesContainer');
+        data.notes.forEach(note => {
+            const noteElement = document.createElement('div');
+            noteElement.innerHTML = `<h3>${note.title}</h3><p>${note.desc}</p>`;
+            notesContainer.appendChild(noteElement);
+        });
+    } else {
+        alert(data.message);
+    }
 });
