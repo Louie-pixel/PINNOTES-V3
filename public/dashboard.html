@@ -3,68 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="sidebar">
-        <h2>My Dashboard</h2>
-        <a href="#" id="dashboardButton">Dashboard</a>
-        <a href="/login" id="loginButton">Login</a> <!-- Add a login button -->
-        <a href="/logout" id="logoutButton">Logout</a>
+    <div class="container">
+        <h2>Dashboard</h2>
+        <button id="newNoteBtn" class="btn">New Note</button>
+        <div id="notesContainer"></div>
     </div>
-
-    <div class="content">
-        <div class="search-bar">
-            <input type="text" placeholder="Search notes..." id="searchBar">
-            <button class="plus-button" id="createNoteButton">+</button> <!-- Create Note Button -->
-        </div>
-
-        <h2>Your Notes</h2>
-        <div id="notesList"></div>
-        <button id="refreshNotesButton" class="btn btn-primary">Refresh Notes</button>
-    </div>
-
-    <script>
-        const sessionId = new URLSearchParams(window.location.search).get('sessionId');
-
-        // Redirect to note creation page on button click
-        document.getElementById('createNoteButton').addEventListener('click', () => {
-            window.location.href = `/newnote?sessionId=${sessionId}`;
-        });
-
-        // Fetch notes and display them
-        function fetchNotes() {
-            fetch('/getnotes', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ sessionId }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                const notesList = document.getElementById('notesList');
-                notesList.innerHTML = '';
-                if (data.success) {
-                    data.notes.forEach(note => {
-                        const noteCard = document.createElement('div');
-                        noteCard.className = 'note-card';
-                        noteCard.innerHTML = `<h4>${note.title}</h4><p>${note.desc}</p>`;
-                        notesList.appendChild(noteCard);
-                    });
-                } else {
-                    notesList.innerHTML = `<p>${data.message}</p>`;
-                }
-            });
-        }
-
-        // Refresh button to reload notes
-        document.getElementById('refreshNotesButton').addEventListener('click', fetchNotes);
-
-        // Fetch notes on page load
-        fetchNotes();
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
