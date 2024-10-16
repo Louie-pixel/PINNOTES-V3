@@ -62,10 +62,17 @@
             border-color: #333;
         }
         .dark-mode .actions-button {
-            color: white; /* Text color for actions button in dark mode */
+            color: white; /* Actions button color in dark mode */
         }
         .actions-button {
-            color: #333; /* Text color for actions button in light mode */
+            color: #333; /* Actions button color in light mode */
+        }
+        /* Set button colors in dropdown based on theme */
+        .dropdown button {
+            color: #333; /* Default to light mode */
+        }
+        .dark-mode .dropdown button {
+            color: white; /* Change to white in dark mode */
         }
     </style>
 </head>
