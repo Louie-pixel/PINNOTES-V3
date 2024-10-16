@@ -27,16 +27,10 @@
             border-radius: 5px;
             font-size: 16px;
         }
-        .dropdown-content button {
-            color: black; /* Light mode text color */
-        }
-        .dark-mode .dropdown-content button {
-            color: white; /* Dark mode text color */
-        }
     </style>
 </head>
 <body>
-    <h1 id="formTitle">Create New Note</h1>
+    <h1>Create New Note</h1>
     <input type="text" id="noteTitle" class="title-input" placeholder="Enter note title" required>
     <div id="editor"></div>
     <button class="btn" id="saveNote">Save Note</button>
@@ -61,31 +55,14 @@
             }
         });
 
-        // Check if there's an existing note to edit
-        const urlParams = new URLSearchParams(window.location.search);
-        const noteId = urlParams.get('noteId');
-
-        if (noteId) {
-            fetch(`/getnote/${noteId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('formTitle').textContent = 'Edit Note';
-                    document.getElementById('noteTitle').value = data.note.title;
-                    quill.root.innerHTML = data.note.desc; // Populate the editor with existing content
-                } else {
-                    alert('Failed to fetch note: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
+        // Populate fields if editing an existing note
+        window.onload = function() {
+            const editNoteId = localStorage.getItem('editNoteId');
+            if (editNoteId) {
+                document.getElementById('noteTitle').value = localStorage.getItem('editNoteTitle');
+                quill.root.innerHTML = localStorage.getItem('editNoteDesc');
+            }
+        };
 
         document.getElementById('saveNote').addEventListener('click', () => {
             const title = document.getElementById('noteTitle').value; // Get the note title
@@ -96,26 +73,25 @@
                 return;
             }
 
-            const endpoint = noteId ? '/editnote' : '/addnote'; // Determine the endpoint
-            const body = JSON.stringify({
-                title,
-                desc,
-                sessionId: localStorage.getItem('sessionId'), // Retrieve the session ID from local storage
-                ...(noteId && { id: noteId }) // Include noteId if editing
-            });
+            const method = localStorage.getItem('editNoteId') ? 'PUT' : 'POST'; // Use PUT for editing
+            const noteId = localStorage.getItem('editNoteId');
 
-            // Save or update the note via POST request
-            fetch(endpoint, {
-                method: 'POST',
+            // Save or update the note via POST or PUT request
+            fetch(method === 'PUT' ? `/updatenote/${noteId}` : '/addnote', {
+                method: method,
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body
+                body: JSON.stringify({
+                    title,
+                    desc,
+                    sessionId: localStorage.getItem('sessionId') // Retrieve the session ID from local storage
+                })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert(noteId ? 'Note updated successfully!' : 'Note saved successfully!');
+                    alert('Note saved successfully!');
                     window.location.href = '/dashboard'; // Redirect to the dashboard after saving
                 } else {
                     alert('Failed to save note: ' + data.message);
