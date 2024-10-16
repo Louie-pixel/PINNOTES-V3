@@ -55,12 +55,10 @@
             }
         });
 
-        // Check if there is a note to edit
-        const editNoteId = localStorage.getItem('editNoteId');
+        let editNoteId = localStorage.getItem('editNoteId'); // Get edit note ID from local storage
         if (editNoteId) {
             document.getElementById('noteTitle').value = localStorage.getItem('editNoteTitle');
-            const desc = localStorage.getItem('editNoteDesc');
-            quill.root.innerHTML = desc; // Load existing note content
+            quill.root.innerHTML = localStorage.getItem('editNoteDesc');
         }
 
         document.getElementById('saveNote').addEventListener('click', () => {
