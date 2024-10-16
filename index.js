@@ -30,18 +30,16 @@ app.get('/signup.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'signup.html'));
 });
 
-// Serve profile.html directly
 app.get('/profile.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'profile.html'));
 });
 
-// Serve dashboard.html directly
 app.get('/dashboard.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
-// Serve newnote.html for the "Create New Note" functionality
-app.get('/newnote.html', (req, res) => {
+// Serve newnote.html when /newnote is accessed
+app.get('/newnote', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'newnote.html'));
 });
 
