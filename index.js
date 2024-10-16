@@ -48,7 +48,7 @@ app.post('/register', (req, res) => {
     if (users.find(user => user.email === email || user.username === username)) {
         return res.json({ success: false, message: 'User already exists' });
     }
-    users.push({ email, username, password });
+    users.push({ email, username, password, profilePicture: 'default-profile.png' });
     console.log('Current users:', users);  // Log users after registration
     return res.json({ success: true, message: 'User registered' });
 });
@@ -172,7 +172,7 @@ app.post('/getarchivednotes', (req, res) => {
 
 // API: Update user profile
 app.post('/updateprofile', (req, res) => {
-    const { username, email, description, contact, sessionId } = req.body;
+    const { username, email, sessionId } = req.body;
     const user = sessions[sessionId];
 
     if (!user) {
@@ -181,13 +181,34 @@ app.post('/updateprofile', (req, res) => {
 
     user.username = username || user.username;
     user.email = email || user.email;
-    user.description = description || user.description;
-    user.contact = contact || user.contact;
 
     return res.json({ success: true, message: 'Profile updated' });
 });
 
+// Profile API to get user profile
+app.post('/profile', (req, res) => {
+    const { sessionId } = req.body;
+    const userId = sessions[sessionId];
+    const user = users.find(u => u.email === userId.email); // Assuming user is stored by email
+    if (user) {
+        return res.json({ success: true, profile: { username: user.username, email: user.email, profilePicture: user.profilePicture } });
+    }
+    res.json({ success: false, message: 'User not found.' });
+});
+
+// Save a profile picture
+app.post('/saveProfilePicture', (req, res) => {
+    const { sessionId, pictureUrl } = req.body;
+    const userId = sessions[sessionId];
+    const user = users.find(u => u.email === userId.email); // Assuming user is stored by email
+    if (user) {
+        user.profilePicture = pictureUrl; // Update profile picture
+        return res.json({ success: true, message: 'Profile picture updated successfully.' });
+    }
+    res.json({ success: false, message: 'User not found.' });
+});
+
 // Start the server
 app.listen(PORT, () => {
-     console.log(`Server running on http://192.168.0.106:${PORT}`);
+    console.log(`Server running on http://192.168.0.106:${PORT}`);
 });
