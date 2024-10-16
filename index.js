@@ -48,7 +48,14 @@ app.post('/register', (req, res) => {
     if (users.find(user => user.email === email || user.username === username)) {
         return res.json({ success: false, message: 'User already exists' });
     }
-    users.push({ email, username, password, name: '', description: '', contact: '', profilePicture: 'default-profile.png' });
+    users.push({
+        email,
+        username,
+        password,
+        profilePicture: 'default-profile.png',
+        description: '',
+        contact: '',
+    });
     console.log('Current users:', users);  // Log users after registration
     return res.json({ success: true, message: 'User registered' });
 });
@@ -172,7 +179,7 @@ app.post('/getarchivednotes', (req, res) => {
 
 // API: Update user profile
 app.post('/updateprofile', (req, res) => {
-    const { username, email, name, description, contact, sessionId } = req.body;
+    const { username, email, description, contact, sessionId } = req.body;
     const user = sessions[sessionId];
 
     if (!user) {
@@ -180,31 +187,40 @@ app.post('/updateprofile', (req, res) => {
     }
 
     // Update user profile information
-    const currentUser = users.find(u => u.email === user.email);
-    if (currentUser) {
-        currentUser.username = username || currentUser.username;
-        currentUser.email = email || currentUser.email;
-        currentUser.name = name || currentUser.name;
-        currentUser.description = description || currentUser.description;
-        currentUser.contact = contact || currentUser.contact;
+    const foundUser = users.find(u => u.email === user.email);
+    if (foundUser) {
+        foundUser.username = username || foundUser.username;
+        foundUser.email = email || foundUser.email;
+        foundUser.description = description || foundUser.description;
+        foundUser.contact = contact || foundUser.contact;
 
-        return res.json({ success: true, message: 'Profile updated' });
+        return res.json({ success: true, message: 'Profile updated', profile: foundUser });
     }
+
     return res.json({ success: false, message: 'User not found' });
 });
 
-// Profile API to get user profile
+// API: Get user profile
 app.post('/profile', (req, res) => {
     const { sessionId } = req.body;
     const userId = sessions[sessionId];
     const user = users.find(u => u.email === userId.email); // Assuming user is stored by email
     if (user) {
-        return res.json({ success: true, profile: { username: user.username, email: user.email, name: user.name, description: user.description, contact: user.contact, profilePicture: user.profilePicture } });
+        return res.json({
+            success: true,
+            profile: {
+                username: user.username,
+                email: user.email,
+                profilePicture: user.profilePicture,
+                description: user.description,
+                contact: user.contact,
+            }
+        });
     }
     res.json({ success: false, message: 'User not found.' });
 });
 
-// Save a profile picture
+// API: Save a profile picture
 app.post('/saveProfilePicture', (req, res) => {
     const { sessionId, pictureUrl } = req.body;
     const userId = sessions[sessionId];
