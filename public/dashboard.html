@@ -61,6 +61,12 @@
             background: #1e1e1e;
             border-color: #333;
         }
+        .dark-mode .actions-button {
+            color: white; /* Text color for actions button in dark mode */
+        }
+        .actions-button {
+            color: #333; /* Text color for actions button in light mode */
+        }
     </style>
 </head>
 <body>
@@ -75,6 +81,7 @@
         document.getElementById('toggleMode').onclick = function() {
             document.body.classList.toggle('dark-mode');
             this.textContent = document.body.classList.contains('dark-mode') ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+            updateActionsButtonTextColor(); // Update actions button text color
         };
 
         function fetchNotes() {
@@ -96,7 +103,7 @@
                                 <h3>${note.title}</h3>
                                 <div>${note.desc}</div>
                                 <div class="note-actions">
-                                    <button onclick="toggleDropdown(event)">Actions</button>
+                                    <button class="actions-button" onclick="toggleDropdown(event)">Actions</button>
                                     <div class="dropdown">
                                         <button onclick="editNote(${note.id}, '${note.title}', '${note.desc.replace(/'/g, "\\'")}')">Edit</button>
                                         <button onclick="deleteNote(${note.id})">Delete</button>
@@ -107,12 +114,20 @@
                             </div>
                         `;
                     });
+                    updateActionsButtonTextColor(); // Update actions button text color
                 } else {
                     alert(data.message);
                 }
             })
             .catch(error => {
                 console.error('Error fetching notes:', error);
+            });
+        }
+
+        function updateActionsButtonTextColor() {
+            const actionsButtons = document.querySelectorAll('.actions-button');
+            actionsButtons.forEach(button => {
+                button.style.color = document.body.classList.contains('dark-mode') ? 'white' : '#333';
             });
         }
 
