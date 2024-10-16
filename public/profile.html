@@ -5,6 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Add your custom styles here */
+        .profile-container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+        }
+        .profile-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .profile-info img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-right: 20px;
+        }
+        .profile-details {
+            flex: 1;
+        }
+    </style>
 </head>
 <body>
     <div class="profile-container">
@@ -38,16 +63,23 @@
     </div>
 
     <script>
-        let sessionId = localStorage.getItem('sessionId');
+        const sessionId = localStorage.getItem('sessionId');
 
         // Load user profile
         async function loadProfile() {
+            if (!sessionId) {
+                alert('Session expired. Please log in again.');
+                window.location.href = '/login.html'; // Redirect to login if no session
+                return;
+            }
+
             const response = await fetch('/profile', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sessionId })
             });
             const data = await response.json();
+
             if (data.success) {
                 document.getElementById('username').textContent = data.profile.username;
                 document.getElementById('email').textContent = data.profile.email;
