@@ -45,16 +45,28 @@
         }
         .search-bar {
             margin-bottom: 20px;
+            display: flex;
+            align-items: center;
         }
-        .plus-button {
-            font-size: 24px;
+        .search-bar input[type="text"] {
+            width: 300px;
             padding: 10px;
-            border-radius: 50%;
-            color: white;
-            background-color: #28a745;
-            border: none;
-            cursor: pointer;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .search-bar button {
             margin-left: 10px;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .search-bar button.plus-button {
+            background-color: #007bff;
+            font-size: 18px;
+            padding: 10px 15px;
         }
     </style>
 </head>
@@ -63,29 +75,64 @@
         <h2>My Dashboard</h2>
         <a href="#" id="dashboardButton">Dashboard</a>
         <a href="#" id="profileButton">Profile</a>
+        <a href="/login" id="loginButton">Login</a>
         <a href="/logout">Logout</a>
     </div>
 
     <div class="content">
-        <h2>Your Notes</h2>
-        <div class="search-bar">
-            <input type="text" class="form-control" placeholder="Search notes...">
-            <button class="plus-button" id="createNoteButton">+</button>
+        <div id="dashboardContent">
+            <div class="search-bar">
+                <input type="text" placeholder="Search notes..." id="searchBar">
+                <button class="plus-button" id="createNoteButton">+</button>
+            </div>
+
+            <h2>Your Notes</h2>
+            <div id="notesList"></div>
+            <button class="btn btn-primary" id="refreshNotesButton">Refresh Notes</button>
         </div>
-        <div id="notesList"></div>
+
+        <div id="profileContent" style="display: none;">
+            <h2>Profile</h2>
+            <form id="profileForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" class="form-control" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" class="form-control" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea class="form-control" id="description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="contact">Contact:</label>
+                    <input type="text" class="form-control" id="contact">
+                </div>
+                <div class="form-group">
+                    <label for="profileImage">Profile Image:</label>
+                    <input type="file" class="form-control" id="profileImage">
+                </div>
+                <button type="submit" class="btn btn-success">Update Profile</button>
+            </form>
+        </div>
     </div>
 
     <script>
         const sessionId = new URLSearchParams(window.location.search).get('sessionId');
+
+        // Redirect to new note creation page on click of Plus button
+        document.getElementById('createNoteButton').addEventListener('click', () => {
+            window.location.href = `/newnote?sessionId=${sessionId}`;
+        });
 
         document.getElementById('profileButton').addEventListener('click', () => {
             document.getElementById('dashboardContent').style.display = 'none';
             document.getElementById('profileContent').style.display = 'block';
         });
 
-        document.getElementById('createNoteButton').addEventListener('click', () => {
-            window.location.href = `/newnote?sessionId=${sessionId}`; // Redirect to create new note page
-        });
+        document.getElementById('refreshNotesButton').addEventListener('click', fetchNotes);
 
         function fetchNotes() {
             fetch('/getnotes', {
@@ -111,6 +158,31 @@
                 }
             });
         }
+
+        document.getElementById('profileForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('name', document.getElementById('name').value);
+            formData.append('email', document.getElementById('email').value);
+            formData.append('description', document.getElementById('description').value);
+            formData.append('contact', document.getElementById('contact').value);
+            const profileImage = document.getElementById('profileImage').files[0];
+            if (profileImage) {
+                formData.append('profileImage', profileImage);
+            }
+
+            fetch('/updateprofile', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'sessionId': sessionId // Send session ID as a header
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            });
+        });
 
         // Automatically fetch notes when the dashboard is loaded
         fetchNotes();
