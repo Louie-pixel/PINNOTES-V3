@@ -3,57 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
     <title>Login</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <h2>Login</h2>
         <form id="loginForm">
             <div class="form-group">
-                <label for="usernameEmail">Username or Email</label>
-                <input type="text" id="usernameEmail" class="form-control" placeholder="Enter username or email" required>
+                <label for="usernameEmail">Username or Email:</label>
+                <input type="text" id="usernameEmail" required>
             </div>
             <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" class="form-control" placeholder="Enter password" required>
+                <label for="password">Password:</label>
+                <input type="password" id="password" required>
             </div>
-            <button type="submit" class="btn btn-primary">Login</button>
+            <button type="submit" class="btn">Login</button>
+            <p>Don't have an account? <a href="/signup">Sign Up</a></p>
         </form>
-        <div id="loginMessage"></div>
-        <p class="text-center">Don't have an account? <a href="/signup">Sign up here</a></p> <!-- Added signup link -->
     </div>
-
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            const usernameEmail = document.getElementById('usernameEmail').value;
-            const password = document.getElementById('password').value;
-
-            fetch('/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ usernameEmail, password }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                const loginMessage = document.getElementById('loginMessage');
-                if (data.success) {
-                    loginMessage.innerHTML = '<p class="text-success">' + data.message + '</p>';
-                    // Redirect to dashboard after successful login
-                    window.location.href = `/dashboard?sessionId=${data.sessionId}`;
-                } else {
-                    loginMessage.innerHTML = '<p class="text-danger">' + data.message + '</p>';
-                }
-            })
-            .catch(error => {
-                console.error('Error during login:', error);
-            });
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
