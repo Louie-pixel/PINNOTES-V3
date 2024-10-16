@@ -1,80 +1,47 @@
+/* Default light mode styles */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
+    background-color: white; /* Light mode background */
+    color: #333; /* Dark text for light mode */
+    transition: background-color 0.5s ease, color 0.5s ease; /* Smooth transition */
 }
 
-.container {
-    max-width: 400px;
-    margin: 100px auto;
-    padding: 20px;
-    background: white;
+.note {
+    border: 1px solid #ccc;
     border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-h1 {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-input {
-    width: 100%;
     padding: 10px;
     margin: 10px 0;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    background: white; /* Light mode note background */
 }
 
 button {
-    width: 100%;
-    padding: 10px;
-    background: #28a745;
-    color: white;
+    background-color: #4CAF50; /* Green */
+    color: white; /* White text */
     border: none;
+    padding: 10px;
     border-radius: 5px;
     cursor: pointer;
 }
 
 button:hover {
-    background: #218838;
+    background-color: #45a049; /* Darker green */
 }
 
-p {
-    text-align: center;
+/* Dark mode styles */
+body.dark-mode {
+    background-color: black; /* Dark mode background */
+    color: white; /* Light text for dark mode */
 }
 
-a {
-    color: #007bff;
-    text-decoration: none;
+.note.dark-mode {
+    background: #333; /* Darker note background */
+    border: 1px solid #555; /* Darker border for notes */
 }
 
-a:hover {
-    text-decoration: underline;
+button.dark-mode {
+    background-color: #555; /* Darker button for dark mode */
 }
 
-.sidebar {
-    background: #333;
-    color: white;
-    width: 200px;
-    height: 100vh;
-    position: fixed;
-}
-
-.content {
-    margin-left: 220px;
-    padding: 20px;
-}
-
-#notes-list {
-    list-style-type: none;
-}
-
-#search-bar {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+button.dark-mode:hover {
+    background-color: #666; /* Darker button hover */
 }
