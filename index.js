@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 let users = [];
 let notes = [];
 let archivedNotes = [];
-let sessions = {};  // Store active sessions by username
+let sessions = {}; // Store active sessions by username
 
 // Middleware
 app.use(bodyParser.json());
@@ -58,6 +58,7 @@ app.post('/login', (req, res) => {
     );
 
     if (!user) {
+        console.log('Invalid credentials for:', identifier); // Log invalid credentials
         return res.json({ success: false, message: 'Invalid credentials' });
     }
 
@@ -65,6 +66,7 @@ app.post('/login', (req, res) => {
     const sessionId = Date.now().toString();
     sessions[sessionId] = { email: user.email, username: user.username };
 
+    console.log('User logged in:', user.username); // Log successful login
     return res.json({ success: true, message: 'Login successful', sessionId });
 });
 
