@@ -74,10 +74,22 @@
         .dark-mode .dropdown button {
             color: white; /* Change to white in dark mode */
         }
+        .profile {
+            margin-bottom: 20px; /* Space below profile */
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
     </style>
 </head>
 <body>
     <h1>Your Notes</h1>
+    <div class="profile">
+        <h2>Your Profile</h2>
+        <img src="default-profile.png" alt="Profile Picture" id="profilePicture" width="100">
+        <button onclick="window.location.href='profile.html'">Edit Profile</button>
+    </div>
     <button id="toggleMode">Switch to Dark Mode</button>
     <div id="notesContainer" class="note-container"></div>
     <button class="btn" onclick="window.location.href='newnote.html'">Create Note</button>
