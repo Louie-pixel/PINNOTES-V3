@@ -48,14 +48,7 @@ app.post('/register', (req, res) => {
     if (users.find(user => user.email === email || user.username === username)) {
         return res.json({ success: false, message: 'User already exists' });
     }
-    users.push({
-        email,
-        username,
-        password,
-        profilePicture: 'default-profile.png',
-        description: '',
-        contact: '',
-    });
+    users.push({ email, username, password, profilePicture: 'default-profile.png', name: '', description: '' });
     console.log('Current users:', users);  // Log users after registration
     return res.json({ success: true, message: 'User registered' });
 });
@@ -179,55 +172,31 @@ app.post('/getarchivednotes', (req, res) => {
 
 // API: Update user profile
 app.post('/updateprofile', (req, res) => {
-    const { username, email, description, contact, sessionId } = req.body;
-    const user = sessions[sessionId];
+    const { name, description, picture, sessionId } = req.body;
+    const userId = sessions[sessionId];
 
-    if (!user) {
+    if (!userId) {
         return res.json({ success: false, message: 'Unauthorized. Please log in.' });
     }
 
-    // Update user profile information
-    const foundUser = users.find(u => u.email === user.email);
-    if (foundUser) {
-        foundUser.username = username || foundUser.username;
-        foundUser.email = email || foundUser.email;
-        foundUser.description = description || foundUser.description;
-        foundUser.contact = contact || foundUser.contact;
-
-        return res.json({ success: true, message: 'Profile updated', profile: foundUser });
+    const user = users.find(u => u.email === userId.email);
+    if (user) {
+        user.name = name || user.name;  // Update name
+        user.description = description || user.description;  // Update description
+        user.profilePicture = picture || user.profilePicture; // Update profile picture
+        return res.json({ success: true, message: 'Profile updated' });
     }
 
-    return res.json({ success: false, message: 'User not found' });
+    return res.json({ success: false, message: 'User not found.' });
 });
 
-// API: Get user profile
+// Profile API to get user profile
 app.post('/profile', (req, res) => {
     const { sessionId } = req.body;
     const userId = sessions[sessionId];
     const user = users.find(u => u.email === userId.email); // Assuming user is stored by email
     if (user) {
-        return res.json({
-            success: true,
-            profile: {
-                username: user.username,
-                email: user.email,
-                profilePicture: user.profilePicture,
-                description: user.description,
-                contact: user.contact,
-            }
-        });
-    }
-    res.json({ success: false, message: 'User not found.' });
-});
-
-// API: Save a profile picture
-app.post('/saveProfilePicture', (req, res) => {
-    const { sessionId, pictureUrl } = req.body;
-    const userId = sessions[sessionId];
-    const user = users.find(u => u.email === userId.email); // Assuming user is stored by email
-    if (user) {
-        user.profilePicture = pictureUrl; // Update profile picture
-        return res.json({ success: true, message: 'Profile picture updated successfully.' });
+        return res.json({ success: true, profile: { username: user.username, email: user.email, name: user.name, description: user.description, profilePicture: user.profilePicture } });
     }
     res.json({ success: false, message: 'User not found.' });
 });
