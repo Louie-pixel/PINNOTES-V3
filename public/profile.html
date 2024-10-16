@@ -155,7 +155,7 @@
     <script>
         const sessionId = localStorage.getItem('sessionId');
 
-        // Load user profile on page load
+        // Load user profile
         async function loadProfile() {
             if (!sessionId) {
                 alert('Session expired. Please log in again.');
@@ -175,30 +175,39 @@
                 document.getElementById('email').textContent = data.profile.email;
                 document.getElementById('name-value').textContent = data.profile.name || 'Not set';
                 document.getElementById('description-value').textContent = data.profile.description || 'Not set';
+                document.getElementById('profile-picture').src = data.profile.profilePicture || 'default-profile.png';
             } else {
                 alert(data.message);
                 window.location.href = '/login.html'; // Redirect to login if unauthorized
             }
         }
 
-        // Handle profile update
-        document.getElementById('update-profile-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
+        // Update user profile
+        document.getElementById('update-profile-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
             const name = document.getElementById('name-input').value;
             const description = document.getElementById('description-input').value;
-            const response = await fetch('/update-profile', {
+            const profilePictureInput = document.getElementById('profile-picture-input');
+            let picture = 'default-profile.png';
+
+            // Simulate picture upload, replace with actual upload logic if needed
+            if (profilePictureInput.files.length > 0) {
+                const file = profilePictureInput.files[0];
+                // Here you can upload the file to a server and get the URL
+                // For this example, we are just using a placeholder
+                picture = URL.createObjectURL(file); // Simulating image upload
+            }
+
+            const response = await fetch('/updateprofile', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId, name, description })
+                body: JSON.stringify({ name, description, picture, sessionId })
             });
-            const data = await response.json();
 
+            const data = await response.json();
+            alert(data.message);
             if (data.success) {
-                alert('Profile updated successfully!');
-                window.location.href = '/dashboard.html'; // Redirect to dashboard
-            } else {
-                alert(data.message);
+                loadProfile(); // Reload profile to show updated info
             }
         });
 
