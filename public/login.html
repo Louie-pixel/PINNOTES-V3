@@ -28,9 +28,9 @@
             .then(data => {
                 if (data.success) {
                     localStorage.setItem('sessionId', data.sessionId);
-                    window.location.href = '/dashboard';
+                    window.location.href = '/dashboard'; // Redirect to dashboard
                 } else {
-                    alert(data.message);
+                    alert(data.message); // Show error message
                 }
             });
         };
