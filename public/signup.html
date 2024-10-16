@@ -58,5 +58,31 @@
     </form>
     <p>Already have an account? <a href="login.html">Login</a></p>
     <script src="scripts.js"></script> <!-- Ensure this points to your JS file -->
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent the default form submission
+
+            const email = document.getElementById('email').value;
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, username, password }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Redirect to the login page on successful signup
+                window.location.href = 'login.html';
+            } else {
+                alert(result.message); // Display an error message if signup fails
+            }
+        });
+    </script>
 </body>
 </html>
