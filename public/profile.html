@@ -42,21 +42,27 @@
 
         // Load user profile
         async function loadProfile() {
-            const response = await fetch('/profile', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId })
-            });
-            const data = await response.json();
-            if (data.success) {
-                document.getElementById('username').textContent = data.profile.username;
-                document.getElementById('email').textContent = data.profile.email;
-                document.getElementById('name-value').textContent = data.profile.name || 'Not set';
-                document.getElementById('description-value').textContent = data.profile.description || 'Not set';
-                document.getElementById('profile-picture').src = data.profile.profilePicture || 'default-profile.png';
-            } else {
-                alert(data.message);
-                window.location.href = '/login.html'; // Redirect to login if unauthorized
+            try {
+                const response = await fetch('/profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('username').textContent = data.profile.username;
+                    document.getElementById('email').textContent = data.profile.email;
+                    document.getElementById('name-value').textContent = data.profile.name || 'Not set';
+                    document.getElementById('description-value').textContent = data.profile.description || 'Not set';
+                    document.getElementById('profile-picture').src = data.profile.profilePicture || 'default-profile.png';
+                } else {
+                    alert(data.message);
+                    window.location.href = '/login.html'; // Redirect to login if unauthorized
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                alert('Failed to load profile. Please try again later.');
+                window.location.href = '/login.html'; // Redirect to login on error
             }
         }
 
@@ -76,16 +82,21 @@
                 picture = URL.createObjectURL(file); // Simulating image upload
             }
 
-            const response = await fetch('/updateprofile', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, description, picture, sessionId })
-            });
+            try {
+                const response = await fetch('/updateprofile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, description, picture, sessionId })
+                });
 
-            const data = await response.json();
-            alert(data.message);
-            if (data.success) {
-                loadProfile(); // Reload profile to show updated info
+                const data = await response.json();
+                alert(data.message);
+                if (data.success) {
+                    loadProfile(); // Reload profile to show updated info
+                }
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                alert('Failed to update profile. Please try again later.');
             }
         });
 
@@ -95,7 +106,7 @@
             window.location.href = '/login.html'; // Redirect to login page
         });
 
-        loadProfile();
+        loadProfile(); // Call to load the user profile when the page is loaded
     </script>
 </body>
 </html>
